@@ -24,8 +24,12 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
-function formatUsd(value) {
-  return `$${Number(value).toFixed(2)}`;
+function formatPrice(value, currency = "USD") {
+  return new Intl.NumberFormat(currency === "KRW" ? "ko-KR" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: currency === "KRW" ? 0 : 2,
+  }).format(Number(value));
 }
 
 function uniqueByDateAndPrice(history) {
@@ -40,6 +44,7 @@ function uniqueByDateAndPrice(history) {
 
 function buildSvg(history, title) {
   const points = uniqueByDateAndPrice(history);
+  const currency = points.find((point) => point.priceCurrency)?.priceCurrency || "USD";
   const chartWidth = WIDTH - PAD.left - PAD.right;
   const chartHeight = HEIGHT - PAD.top - PAD.bottom;
   const prices = points.map((point) => Number(point.salePriceUsd));
@@ -65,7 +70,7 @@ function buildSvg(history, title) {
     const y = PAD.top + chartHeight * ratio;
     return `
       <line x1="${PAD.left}" y1="${y}" x2="${WIDTH - PAD.right}" y2="${y}" stroke="#e5e7eb" stroke-width="1" />
-      <text x="${PAD.left - 14}" y="${y + 5}" text-anchor="end" font-size="16" fill="#64748b">${formatUsd(value)}</text>
+      <text x="${PAD.left - 14}" y="${y + 5}" text-anchor="end" font-size="16" fill="#64748b">${formatPrice(value, currency)}</text>
     `;
   }).join("");
 
@@ -73,7 +78,7 @@ function buildSvg(history, title) {
     const labelAnchor = points.length === 1 ? "middle" : index === 0 ? "start" : index === points.length - 1 ? "end" : "middle";
     const valueAnchor = points.length === 1 ? "middle" : index === 0 ? "start" : index === points.length - 1 ? "end" : "middle";
     const valueX = index === 0 ? point.x + 8 : index === points.length - 1 ? point.x - 8 : point.x;
-    const value = `${Math.round(point.savingsPercent)}% · ${formatUsd(point.salePriceUsd)}`;
+    const value = `${Math.round(point.savingsPercent)}% · ${formatPrice(point.salePriceUsd, point.priceCurrency || currency)}`;
     return `
       <text x="${point.x}" y="${HEIGHT - 38}" text-anchor="${labelAnchor}" font-size="15" fill="#64748b">${formatDate(point.checkedAt)}</text>
       <text x="${valueX}" y="${Math.max(PAD.top + 24, point.y - 16)}" text-anchor="${valueAnchor}" font-size="15" font-weight="700" fill="#0f766e">${value}</text>

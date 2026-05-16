@@ -15,14 +15,35 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
   currency: "USD",
 });
 
+function formatCurrency(value, currency) {
+  return new Intl.NumberFormat(currency === "KRW" ? "ko-KR" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: currency === "KRW" ? 0 : 2,
+  }).format(Number(value));
+}
+
 function formatKrw(usdPrice, usdToKrw) {
   return krwFormatter.format(Math.round(Number(usdPrice) * usdToKrw));
 }
 
+function formatDealPrice(value, deal, usdToKrw) {
+  if (deal.priceCurrency && deal.priceCurrency !== "USD") {
+    return formatCurrency(value, deal.priceCurrency);
+  }
+
+  return `${formatKrw(value, usdToKrw)} (${usdFormatter.format(Number(value))})`;
+}
+
+function formatHistoryPrice(value, currency, usdToKrw) {
+  if (currency && currency !== "USD") return formatCurrency(value, currency);
+  return `${formatKrw(value, usdToKrw)} (${usdFormatter.format(Number(value))})`;
+}
+
 export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options = {}) {
   const discount = Math.round(Number(deal.savings));
-  const dealUrl = new URL(CHEAPSHARK_REDIRECT);
-  dealUrl.searchParams.set("dealID", deal.dealID);
+  const dealUrl = deal.storeUrl ? new URL(deal.storeUrl) : new URL(CHEAPSHARK_REDIRECT);
+  if (!deal.storeUrl) dealUrl.searchParams.set("dealID", deal.dealID);
   const storeName = REQUESTED_STORES.get(String(deal.storeID)) ?? `Store ${deal.storeID}`;
   const developers = steamDetails?.developers?.join(", ") || "정보 없음";
   const publishers = steamDetails?.publishers?.join(", ") || "정보 없음";
@@ -35,12 +56,12 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
     .addFields(
       {
         name: "할인가",
-        value: `${formatKrw(deal.salePrice, usdToKrw)} (${usdFormatter.format(Number(deal.salePrice))})`,
+        value: formatDealPrice(deal.salePrice, deal, usdToKrw),
         inline: true,
       },
       {
         name: "정가",
-        value: `${formatKrw(deal.normalPrice, usdToKrw)} (${usdFormatter.format(Number(deal.normalPrice))})`,
+        value: formatDealPrice(deal.normalPrice, deal, usdToKrw),
         inline: true,
       },
       {
@@ -61,6 +82,13 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
       {
         name: "AAA 판별",
         value: aaaReason,
+        inline: false,
+      },
+      {
+        name: "지역 기준",
+        value: deal.regionVerified
+          ? `${deal.region ?? "KR"} Steam 가격 검증됨`
+          : `${deal.region ?? "KR"} 구매 가능 여부 미검증`,
         inline: false,
       },
     )
@@ -95,7 +123,7 @@ export function buildHistoryEmbed(game, history, options = {}) {
     embed.addFields(
       {
         name: "최근 할인가",
-        value: `${formatKrw(latest.salePriceUsd, options.usdToKrw)} (${usdFormatter.format(Number(latest.salePriceUsd))})`,
+        value: formatHistoryPrice(latest.salePriceUsd, latest.priceCurrency, options.usdToKrw),
         inline: true,
       },
       {

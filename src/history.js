@@ -51,6 +51,7 @@ function openDatabase() {
       checked_at TEXT NOT NULL,
       sale_price_usd REAL NOT NULL,
       normal_price_usd REAL NOT NULL,
+      price_currency TEXT NOT NULL DEFAULT 'USD',
       savings_percent REAL NOT NULL,
       deal_id TEXT NOT NULL,
       FOREIGN KEY (game_key) REFERENCES games(game_key)
@@ -59,6 +60,10 @@ function openDatabase() {
     CREATE INDEX IF NOT EXISTS idx_deal_history_game_store_date
       ON deal_history (game_key, store_id, checked_at);
   `);
+  const columns = db.prepare("PRAGMA table_info(deal_history)").all();
+  if (!columns.some((column) => column.name === "price_currency")) {
+    db.exec("ALTER TABLE deal_history ADD COLUMN price_currency TEXT NOT NULL DEFAULT 'USD'");
+  }
   return db;
 }
 
@@ -96,7 +101,7 @@ function upsertGame(db, item, checkedAt) {
 
 function getLastHistory(db, gameKey, storeId) {
   return db.prepare(`
-    SELECT sale_price_usd, normal_price_usd, savings_percent
+    SELECT sale_price_usd, normal_price_usd, price_currency, savings_percent
     FROM deal_history
     WHERE game_key = ? AND store_id = ?
     ORDER BY checked_at DESC, id DESC
@@ -111,6 +116,7 @@ function shouldInsertHistory(db, deal) {
   return !(
     nearlyEqual(last.sale_price_usd, deal.salePrice) &&
     nearlyEqual(last.normal_price_usd, deal.normalPrice) &&
+    String(last.price_currency || "USD") === String(deal.priceCurrency || "USD") &&
     nearlyEqual(last.savings_percent, deal.savings)
   );
 }
@@ -132,10 +138,11 @@ export function recordDealHistories(items, checkedAt = new Date().toISOString())
         checked_at,
         sale_price_usd,
         normal_price_usd,
+        price_currency,
         savings_percent,
         deal_id
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     for (const item of items) {
@@ -157,6 +164,7 @@ export function recordDealHistories(items, checkedAt = new Date().toISOString())
         checkedAt,
         toNumber(deal.salePrice),
         toNumber(deal.normalPrice),
+        deal.priceCurrency || "USD",
         toNumber(deal.savings),
         deal.dealID,
       );
@@ -182,6 +190,7 @@ export function getDealHistory(deal, limit = 20) {
         checked_at AS checkedAt,
         sale_price_usd AS salePriceUsd,
         normal_price_usd AS normalPriceUsd,
+        price_currency AS priceCurrency,
         savings_percent AS savingsPercent
       FROM deal_history
       WHERE game_key = ? AND store_id = ?
@@ -222,6 +231,7 @@ export function getDealHistoryByGameKey(gameKey, limit = 20) {
         checked_at AS checkedAt,
         sale_price_usd AS salePriceUsd,
         normal_price_usd AS normalPriceUsd,
+        price_currency AS priceCurrency,
         savings_percent AS savingsPercent,
         store_name AS storeName,
         title

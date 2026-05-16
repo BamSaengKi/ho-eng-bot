@@ -40,10 +40,12 @@ export async function fetchDealDetails(dealId) {
   return getJson(url);
 }
 
-export async function fetchSteamAppDetails(appId) {
+export async function fetchSteamAppDetails(appId, options = {}) {
   const url = new URL(STEAM_APPDETAILS_API);
   url.searchParams.set("appids", appId);
   url.searchParams.set("filters", "basic,developers,publishers,metacritic,price_overview");
+  if (options.region) url.searchParams.set("cc", options.region);
+  if (options.language) url.searchParams.set("l", options.language);
 
   const data = await getJson(url);
   const payload = data?.[appId];

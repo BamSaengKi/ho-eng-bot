@@ -9,6 +9,13 @@ import { REQUESTED_STORES } from "./config.js";
 import { buildDealEmbed } from "./discord.js";
 import { getDealHistory, getGameKey, recordDealHistories } from "./history.js";
 import { handleInteraction } from "./interactions.js";
+import {
+  applySteamRegionalPrice,
+  getSteamRegionOptions,
+  isStrictRegionEnabled,
+  normalizeRegion,
+  shouldSkipStoreForRegion,
+} from "./region.js";
 import { readJson, writeJson } from "./storage.js";
 
 const DATA_DIR = resolve("data");
@@ -27,6 +34,9 @@ const config = {
     .map((value) => value.trim())
     .filter(Boolean),
   fallbackUsdToKrw: Number(process.env.USD_TO_KRW_FALLBACK || 1370),
+  region: normalizeRegion(process.env.REGION),
+  regionStrict: isStrictRegionEnabled(process.env.REGION_STRICT),
+  steamLanguage: process.env.STEAM_LANGUAGE || "korean",
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -44,6 +54,14 @@ function assertConfig() {
 function formatPercent(value) {
   const percent = Number(value);
   return Number.isFinite(percent) ? `${Math.round(percent)}%` : "할인율 정보 없음";
+}
+
+function formatDryRunPrice(value, currency = "USD") {
+  return new Intl.NumberFormat(currency === "KRW" ? "ko-KR" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: currency === "KRW" ? 0 : 2,
+  }).format(Number(value));
 }
 
 function printDryRunDeals(deals, usdToKrw, storeSummaries) {
@@ -67,7 +85,7 @@ function printDryRunDeals(deals, usdToKrw, storeSummaries) {
         `${index + 1}. ${item.deal.title}`,
         `   store: ${storeName}`,
         `   discount: ${formatPercent(item.deal.savings)}`,
-        `   price: $${item.deal.salePrice} (normal $${item.deal.normalPrice})`,
+        `   price: ${formatDryRunPrice(item.deal.salePrice, item.deal.priceCurrency)} (normal ${formatDryRunPrice(item.deal.normalPrice, item.deal.priceCurrency)})`,
         `   reason: ${item.aaaReason}`,
       ].join("\n"),
     );
@@ -76,14 +94,15 @@ function printDryRunDeals(deals, usdToKrw, storeSummaries) {
 
 async function getSteamDetailsWithCache(appId, cache) {
   if (!appId) return null;
-  if (cache[appId]) return cache[appId];
+  const cacheKey = `${appId}:${config.region}:${config.steamLanguage}`;
+  if (cache[cacheKey]) return cache[cacheKey];
 
-  const details = await fetchSteamAppDetails(appId);
-  cache[appId] = {
+  const details = await fetchSteamAppDetails(appId, getSteamRegionOptions(config));
+  cache[cacheKey] = {
     savedAt: new Date().toISOString(),
     ...(details ?? {}),
   };
-  return cache[appId];
+  return cache[cacheKey];
 }
 
 async function collectAaaDeals() {
@@ -106,16 +125,31 @@ async function collectAaaDeals() {
     };
 
     try {
+      if (shouldSkipStoreForRegion(storeId, config)) {
+        summary.error = `${config.region} strict mode skips non-Steam stores`;
+        continue;
+      }
+
       const deals = await fetchDeals({ storeId, minDiscount: config.minDiscount });
       summary.discountedCount = deals.length;
       for (const deal of deals) {
         const steamDetails = await getSteamDetailsWithCache(deal.steamAppID, steamCache);
+        const regionalDeal = applySteamRegionalPrice(deal, steamDetails, config.region);
+        if (config.regionStrict && !regionalDeal) continue;
+
+        const checkedDeal = regionalDeal ?? {
+          ...deal,
+          region: config.region,
+          regionVerified: false,
+        };
+        if (Number(checkedDeal.savings) < config.minDiscount) continue;
+
         const classification = classifyAaaGame(deal, steamDetails);
         if (!classification.isAaa) continue;
         summary.aaaCount += 1;
 
         const item = {
-          deal,
+          deal: checkedDeal,
           steamDetails,
           aaaReason: classification.reason,
         };
@@ -172,7 +206,7 @@ async function postDailyDeals(client) {
   }
 
   await channel.send({
-    content: `오늘의 AAA급 게임 할인 ${deals.length}개를 찾았습니다. (${config.minDiscount}% 이상 할인)`,
+    content: `오늘의 AAA급 게임 할인 ${deals.length}개를 찾았습니다. (${config.region} 기준, ${config.minDiscount}% 이상 할인)`,
   });
 
   for (const item of deals) {

@@ -21,7 +21,7 @@ export async function handleDealCommand(interaction, config) {
   const query = getGameOption(interaction);
   await interaction.deferReply();
 
-  const result = await findBestCurrentDeal(query);
+  const result = await findBestCurrentDeal(query, config);
   if (!result) {
     await replyNoResult(interaction, `"${query}"의 현재 할인 정보를 찾지 못했습니다.`);
     return;

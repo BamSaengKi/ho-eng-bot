@@ -21,6 +21,14 @@ DISCORD_GUILD_ID=...
 `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID`는 slash command 등록용입니다.
 비워두면 `npm run register-commands`가 `DISCORD_CHANNEL_ID` 기준으로 자동 추론합니다.
 
+지역 기준 기본값은 한국 Steam 가격 검증 모드입니다.
+
+```env
+REGION=KR
+REGION_STRICT=true
+STEAM_LANGUAGE=korean
+```
+
 ## 실행
 
 Discord 전송 없이 조회/필터링만 확인:
@@ -65,6 +73,8 @@ Discord 채팅방에서 사용:
 - CheapShark에서 Steam, Epic Games Store, Humble Store, Uplay 할인을 조회합니다.
 - 할인율이 `MIN_DISCOUNT` 이상인 딜만 확인합니다.
 - Steam `appdetails`에서 개발사/퍼블리셔를 확인합니다.
+- 기본값은 `REGION=KR`, `REGION_STRICT=true`라서 Steam 한국 가격이 검증되는 딜만 알림 대상으로 삼습니다.
+- `REGION_STRICT=false`로 바꾸면 외부 스토어도 표시할 수 있지만, 카드에 한국 구매 가능 여부 미검증으로 표시됩니다.
 - AAA 개발사/퍼블리셔 목록에 걸리는 게임만 Discord embed 카드로 전송합니다.
 - 시즌 패스, DLC, 사운드트랙 같은 추가 콘텐츠는 제목 키워드로 제외합니다.
 - 이미 보낸 `dealID`는 `data/sent-deals.json`에 저장해 중복 전송을 막습니다.
