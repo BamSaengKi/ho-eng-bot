@@ -69,6 +69,10 @@ Discord 채팅방에서 사용:
 /alias-add alias:엘든왕 game:Elden Ring
 /alias-list
 /alias-remove alias:엘든왕
+/watch-add game:Hades
+/watch-list
+/watch-remove game:Hades
+/사용법
 ```
 
 ## 동작
@@ -93,6 +97,11 @@ Discord 채팅방에서 사용:
 - `/history`는 `data/deals.sqlite`에 저장된 특정 게임의 할인 기록과 그래프를 보여줍니다.
 - `/alias-add`는 채팅방 사용자가 누구나 사용할 수 있고, `/alias-remove`는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.
 - 채팅에서 추가한 기본 별칭은 `data/deals.sqlite`에 저장되고 `/deal` 검색어 보정에 우선 사용됩니다.
+- `/watch-add`는 개인 관심 게임을 등록하고, 매일 자동 조회 때 할인 조건에 맞으면 DM으로 카드와 할인 기록을 보냅니다.
+- `/watch-list`, `/watch-remove`로 내 관심 게임을 확인하거나 삭제합니다.
+- 관심 게임 DM도 `data/deals.sqlite`의 할인 기록을 사용하며 기록이 2개 이상이면 그래프를 첨부합니다.
+- 같은 사용자/게임/스토어에서 같은 할인율과 가격은 1주일에 1번만 DM으로 보냅니다.
+- 채팅에 `/사용법`을 보내면 봇 사용법을 답장합니다. Discord 개발자 포털에서 Message Content Intent가 켜져 있어야 합니다.
 
 ## AAA 판별
 

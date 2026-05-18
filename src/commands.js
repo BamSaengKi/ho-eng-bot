@@ -46,6 +46,27 @@ export const slashCommands = [
         .setDescription("삭제할 별칭")
         .setRequired(true),
     ),
+  new SlashCommandBuilder()
+    .setName("watch-add")
+    .setDescription("개인 관심 게임을 등록하고 할인 시 DM으로 알림을 받습니다.")
+    .addStringOption((option) =>
+      option
+        .setName("game")
+        .setDescription("등록할 게임 이름")
+        .setRequired(true),
+    ),
+  new SlashCommandBuilder()
+    .setName("watch-list")
+    .setDescription("내 개인 관심 게임 목록을 보여줍니다."),
+  new SlashCommandBuilder()
+    .setName("watch-remove")
+    .setDescription("개인 관심 게임을 삭제합니다.")
+    .addStringOption((option) =>
+      option
+        .setName("game")
+        .setDescription("삭제할 게임 이름")
+        .setRequired(true),
+    ),
 ];
 
 export const commandPayloads = slashCommands.map((command) => command.toJSON());
