@@ -221,6 +221,8 @@ async function postDailyDeals(client) {
         buildDealEmbed(item.deal, item.steamDetails, item.aaaReason, usdToKrw, {
           hasHistoryChart: Boolean(chart),
           historyCount: history.length,
+          history,
+          footerText: "오늘의 할인 정보",
         }),
       ],
       files,

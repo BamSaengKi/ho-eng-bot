@@ -1,12 +1,56 @@
-import { AttachmentBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  AttachmentBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  PermissionFlagsBits,
+} from "discord.js";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { buildDealEmbed, buildHistoryEmbed } from "./discord.js";
-import { findBestCurrentDeal } from "./search.js";
-import { findStoredGamesByTitle, getDealHistory, getDealHistoryByGameKey } from "./history.js";
+import {
+  findCurrentDealFromGame,
+  searchCurrentDealCandidates,
+} from "./search.js";
+import {
+  getAlias,
+  findStoredGamesByTitle,
+  getDealHistory,
+  getDealHistoryByGameKey,
+  listAliases,
+  normalizeAlias,
+  recordDealLookupHistory,
+  removeAlias,
+  upsertAlias,
+} from "./history.js";
+import { GAME_ALIASES } from "./query-normalizer.js";
+
+const SELECT_TTL_MS = 10 * 60 * 1000;
+const pendingDealSelections = new Map();
+const pendingDealShares = new Map();
 
 function getGameOption(interaction) {
   return interaction.options.getString("game", true).trim();
+}
+
+function getAliasOption(interaction) {
+  return interaction.options.getString("alias", true).trim();
+}
+
+function canManageAliases(interaction) {
+  return Boolean(interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild));
+}
+
+async function requireAliasPermission(interaction) {
+  if (canManageAliases(interaction)) return true;
+
+  await interaction.reply({
+    content: "별칭 추가/삭제는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.",
+    ephemeral: true,
+  });
+  return false;
 }
 
 async function replyNoResult(interaction, message) {
@@ -14,35 +58,172 @@ async function replyNoResult(interaction, message) {
     content: message,
     embeds: [],
     files: [],
+    components: [],
   });
 }
 
-export async function handleDealCommand(interaction, config) {
-  const query = getGameOption(interaction);
-  await interaction.deferReply();
+function buildMissingGameMessage(query) {
+  return [
+    `"${query}"와 일치하는 게임 정보를 찾지 못했습니다.`,
+    "영문 정식명으로 다시 검색하거나, 자주 쓰는 이름이라면 별칭을 등록해보세요.",
+    "",
+    `예: /alias-add alias:${query} game:정식 게임명`,
+  ].join("\n");
+}
 
-  const result = await findBestCurrentDeal(query, config);
-  if (!result) {
-    await replyNoResult(interaction, `"${query}"의 현재 할인 정보를 찾지 못했습니다.`);
-    return;
+function truncate(value, maxLength) {
+  const text = String(value ?? "");
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+}
+
+function createSelectionId(interaction) {
+  return `deal_select:${interaction.id}`;
+}
+
+function createShareId(interaction) {
+  return `deal_share:${interaction.id}`;
+}
+
+function saveSelection(id, interaction, search, startedAt) {
+  pendingDealSelections.set(id, {
+    userId: interaction.user.id,
+    search,
+    startedAt,
+    expiresAt: Date.now() + SELECT_TTL_MS,
+  });
+}
+
+function cleanupSelections() {
+  const now = Date.now();
+  for (const [id, selection] of pendingDealSelections.entries()) {
+    if (selection.expiresAt <= now) pendingDealSelections.delete(id);
   }
+  for (const [id, share] of pendingDealShares.entries()) {
+    if (share.expiresAt <= now) pendingDealShares.delete(id);
+  }
+}
 
+function buildSelectMenu(id, candidates) {
+  const menu = new StringSelectMenuBuilder()
+    .setCustomId(id)
+    .setPlaceholder("조회할 게임을 선택해주세요")
+    .addOptions(
+      candidates.slice(0, 10).map((game, index) =>
+        new StringSelectMenuOptionBuilder()
+          .setLabel(truncate(game.external, 100))
+          .setDescription(truncate(`현재 최저가 $${game.cheapest ?? "?"}`, 100))
+          .setValue(String(index)),
+      ),
+    );
+
+  return new ActionRowBuilder().addComponents(menu);
+}
+
+function buildShareButton(id) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(id)
+      .setLabel("공유하고 스레드 만들기")
+      .setStyle(ButtonStyle.Primary),
+  );
+}
+
+function buildShareConfirmButtons(id) {
+  const suffix = id.replace("deal_share:", "");
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`deal_share_confirm:${suffix}`)
+      .setLabel("공유하기")
+      .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+      .setCustomId(`deal_share_cancel:${suffix}`)
+      .setLabel("취소")
+      .setStyle(ButtonStyle.Secondary),
+  );
+}
+
+function formatElapsedSeconds(startedAt) {
+  return `${((performance.now() - startedAt) / 1000).toFixed(2)}초`;
+}
+
+async function renderDealResult(interaction, result, config, startedAt, correction) {
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
+  recordDealLookupHistory({
+    deal: result.deal,
+    steamDetails: result.steamDetails,
+  });
   const history = getDealHistory(result.deal);
   const chart = await generateDiscountHistoryChartPng(history, result.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
     : [];
+  const shareId = createShareId(interaction);
+  pendingDealShares.set(shareId, {
+    userId: interaction.user.id,
+    deal: result.deal,
+    steamDetails: result.steamDetails,
+    history,
+    hasHistoryChart: Boolean(chart),
+    historyCount: history.length,
+    expiresAt: Date.now() + SELECT_TTL_MS,
+  });
 
   await interaction.editReply({
+    content: "",
     embeds: [
       buildDealEmbed(result.deal, result.steamDetails, "사용자 명령어 조회", usdToKrw, {
         hasHistoryChart: Boolean(chart),
         historyCount: history.length,
+        history,
+        lookupLabel: correction
+          ? `${config.region} Steam 현재 할인 정보\n검색어 보정: ${correction.originalQuery} → ${correction.searchQuery}`
+          : `${config.region} Steam 현재 할인 정보`,
+        footerText: `검색 소요 시간: ${formatElapsedSeconds(startedAt)}`,
       }),
     ],
     files,
+    components: [buildShareButton(shareId)],
   });
+}
+
+export async function handleDealCommand(interaction, config) {
+  const query = getGameOption(interaction);
+  const startedAt = performance.now();
+  await interaction.deferReply({ ephemeral: true });
+
+  const search = await searchCurrentDealCandidates(query);
+  if (search.candidates.length === 0) {
+    await replyNoResult(interaction, buildMissingGameMessage(query));
+    return;
+  }
+
+  if (search.candidates.length > 1) {
+    cleanupSelections();
+    const selectionId = createSelectionId(interaction);
+    saveSelection(selectionId, interaction, search, startedAt);
+    const correctionText = search.queryCorrection
+      ? `\n검색어 보정: ${search.originalQuery} → ${search.searchQuery}`
+      : "";
+
+    await interaction.editReply({
+      content: `"${search.searchQuery}" 검색 결과가 여러 개입니다. 조회할 게임을 선택해주세요.${correctionText}`,
+      components: [buildSelectMenu(selectionId, search.candidates)],
+    });
+    return;
+  }
+
+  const result = await findCurrentDealFromGame(search.candidates[0], config);
+  if (!result) {
+    await replyNoResult(interaction, `"${search.candidates[0].external}"의 ${config.region} 현재 할인 정보를 찾지 못했습니다.`);
+    return;
+  }
+
+  await renderDealResult(interaction, result, config, startedAt, search.queryCorrection
+    ? {
+      originalQuery: search.originalQuery,
+      searchQuery: search.searchQuery,
+    }
+    : null);
 }
 
 export async function handleHistoryCommand(interaction, config) {
@@ -73,10 +254,78 @@ export async function handleHistoryCommand(interaction, config) {
   });
 }
 
-export async function handleInteraction(interaction, config) {
-  if (!interaction.isChatInputCommand()) return;
+export async function handleAliasAddCommand(interaction) {
+  const alias = getAliasOption(interaction);
+  const game = getGameOption(interaction);
+  const saved = upsertAlias(alias, game, interaction.user.id);
 
+  await interaction.reply({
+    content: `기본 별칭에 추가했습니다.\n\`${saved.alias}\` → \`${saved.game}\``,
+    ephemeral: true,
+  });
+}
+
+export async function handleAliasListCommand(interaction) {
+  const userAliases = listAliases(30);
+  const customAliasKeys = new Set(userAliases.map((alias) => alias.alias));
+  const defaultAliases = [...GAME_ALIASES.entries()]
+    .filter(([alias]) => !customAliasKeys.has(alias))
+    .map(([alias, game]) => ({ alias, game }));
+  const aliases = [...userAliases, ...defaultAliases].slice(0, 80);
+
+  await interaction.reply({
+    content: [
+    "**기본 별칭**",
+      ...aliases.map((alias) => `\`${alias.alias}\` → \`${alias.game}\``),
+    ].join("\n"),
+    ephemeral: true,
+  });
+}
+
+export async function handleAliasRemoveCommand(interaction) {
+  if (!(await requireAliasPermission(interaction))) return;
+
+  const alias = getAliasOption(interaction);
+  const existing = getAlias(alias);
+  if (!existing) {
+    await interaction.reply({
+      content: `\`${normalizeAlias(alias)}\` 별칭을 찾지 못했습니다.`,
+      ephemeral: true,
+    });
+    return;
+  }
+
+  removeAlias(alias);
+  await interaction.reply({
+    content: `기본 별칭에서 삭제했습니다.\n\`${existing.alias}\` → \`${existing.game}\``,
+    ephemeral: true,
+  });
+}
+
+export async function handleInteraction(interaction, config) {
   try {
+    if (interaction.isButton() && interaction.customId.startsWith("deal_share_confirm:")) {
+      await handleDealShareConfirm(interaction, config);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("deal_share_cancel:")) {
+      await handleDealShareCancel(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("deal_share:")) {
+      await handleDealShare(interaction, config);
+      return;
+    }
+
+    if (interaction.isStringSelectMenu() && interaction.customId.startsWith("deal_select:")) {
+      await handleDealSelection(interaction, config);
+      return;
+    }
+
+    if (!interaction.isChatInputCommand()) return;
+
     if (interaction.commandName === "deal") {
       await handleDealCommand(interaction, config);
       return;
@@ -84,6 +333,21 @@ export async function handleInteraction(interaction, config) {
 
     if (interaction.commandName === "history") {
       await handleHistoryCommand(interaction, config);
+      return;
+    }
+
+    if (interaction.commandName === "alias-add") {
+      await handleAliasAddCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "alias-list") {
+      await handleAliasListCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "alias-remove") {
+      await handleAliasRemoveCommand(interaction);
     }
   } catch (error) {
     console.error(`[error] /${interaction.commandName} failed:`, error);
@@ -99,4 +363,171 @@ export async function handleInteraction(interaction, config) {
       await interaction.reply(payload);
     }
   }
+}
+
+async function handleDealShare(interaction, config) {
+  cleanupSelections();
+  const share = pendingDealShares.get(interaction.customId);
+  if (!share || share.expiresAt <= Date.now()) {
+    pendingDealShares.delete(interaction.customId);
+    await interaction.reply({
+      content: "공유 가능 시간이 만료되었습니다. `/deal` 명령어로 다시 검색해주세요.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  if (share.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 공유 버튼은 명령어를 실행한 사용자만 사용할 수 있습니다.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.reply({
+    content: `"${share.deal.title}" 할인 정보를 이 채널에 공개로 공유하고 스레드를 만들까요?`,
+    components: [buildShareConfirmButtons(interaction.customId)],
+    ephemeral: true,
+  });
+}
+
+async function handleDealShareCancel(interaction) {
+  const shareId = interaction.customId.replace("deal_share_cancel:", "deal_share:");
+  const share = pendingDealShares.get(shareId);
+  if (share && share.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 공유 확인은 명령어를 실행한 사용자만 사용할 수 있습니다.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.update({
+    content: "공유를 취소했습니다.",
+    components: [],
+  });
+}
+
+async function handleDealShareConfirm(interaction, config) {
+  cleanupSelections();
+  const shareId = interaction.customId.replace("deal_share_confirm:", "deal_share:");
+  const share = pendingDealShares.get(shareId);
+  if (!share || share.expiresAt <= Date.now()) {
+    pendingDealShares.delete(shareId);
+    await interaction.update({
+      content: "공유 가능 시간이 만료되었습니다. `/deal` 명령어로 다시 검색해주세요.",
+      components: [],
+    });
+    return;
+  }
+
+  if (share.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 공유 확인은 명령어를 실행한 사용자만 사용할 수 있습니다.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  if (!interaction.channel?.isTextBased()) {
+    await interaction.update({
+      content: "이 채널에서는 공유 메시지를 만들 수 없습니다.",
+      components: [],
+    });
+    return;
+  }
+
+  await interaction.update({
+    content: "공유 중입니다...",
+    components: [],
+  });
+
+  const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
+  const chart = await generateDiscountHistoryChartPng(share.history, share.deal.title);
+  const files = chart
+    ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
+    : [];
+  const message = await interaction.channel.send({
+    content: `<@${interaction.user.id}>님이 공유한 할인 정보입니다.`,
+    embeds: [
+      buildDealEmbed(share.deal, share.steamDetails, "공유된 사용자 조회", usdToKrw, {
+        hasHistoryChart: Boolean(chart),
+        historyCount: share.historyCount,
+        history: share.history,
+        lookupLabel: `${config.region} Steam 현재 할인 정보`,
+        footerText: "공유된 할인 정보",
+      }),
+    ],
+    files,
+  });
+
+  try {
+    await message.startThread({
+      name: truncate(`${share.deal.title} 할인 정보`, 100),
+      reason: "Deal share thread",
+    });
+  } catch (error) {
+    console.warn(`[warn] Failed to create deal share thread: ${error.message}`);
+    await interaction.editReply("할인 정보는 공유했지만 스레드 생성은 실패했습니다.");
+    return;
+  }
+
+  pendingDealShares.delete(shareId);
+  await interaction.editReply("할인 정보를 채널에 공유하고 스레드를 만들었습니다.");
+}
+
+async function handleDealSelection(interaction, config) {
+  const selection = pendingDealSelections.get(interaction.customId);
+  if (!selection || selection.expiresAt <= Date.now()) {
+    pendingDealSelections.delete(interaction.customId);
+    await interaction.update({
+      content: "선택 시간이 만료되었습니다. `/deal` 명령어로 다시 검색해주세요.",
+      embeds: [],
+      files: [],
+      components: [],
+    });
+    return;
+  }
+
+  if (selection.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 선택 메뉴는 명령어를 실행한 사용자만 사용할 수 있습니다.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const index = Number(interaction.values[0]);
+  const game = selection.search.candidates[index];
+  if (!game) {
+    await interaction.update({
+      content: "선택한 검색 결과를 찾지 못했습니다. `/deal` 명령어로 다시 검색해주세요.",
+      embeds: [],
+      files: [],
+      components: [],
+    });
+    return;
+  }
+
+  await interaction.deferUpdate();
+  pendingDealSelections.delete(interaction.customId);
+
+  const result = await findCurrentDealFromGame(game, config);
+  if (!result) {
+    await interaction.editReply({
+      content: `"${game.external}"의 ${config.region} 현재 할인 정보를 찾지 못했습니다.`,
+      embeds: [],
+      files: [],
+      components: [],
+    });
+    return;
+  }
+
+  await renderDealResult(interaction, result, config, selection.startedAt, selection.search.queryCorrection
+    ? {
+      originalQuery: selection.search.originalQuery,
+      searchQuery: selection.search.searchQuery,
+    }
+    : null);
 }
