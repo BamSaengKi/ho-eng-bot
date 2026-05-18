@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { REQUESTED_STORES } from "./config.js";
 
 const DB_PATH = resolve("data", "deals.sqlite");
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 function normalizeTitle(value) {
   return String(value ?? "")
@@ -11,6 +12,13 @@ function normalizeTitle(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+export function normalizeAlias(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
 }
 
 function toNumber(value) {
@@ -59,12 +67,74 @@ function openDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_deal_history_game_store_date
       ON deal_history (game_key, store_id, checked_at);
+
+    CREATE TABLE IF NOT EXISTS aliases (
+      alias TEXT PRIMARY KEY,
+      game TEXT NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
     db.exec("ALTER TABLE deal_history ADD COLUMN price_currency TEXT NOT NULL DEFAULT 'USD'");
   }
   return db;
+}
+
+export function getAlias(alias) {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT alias, game, created_by AS createdBy, created_at AS createdAt
+      FROM aliases
+      WHERE alias = ?
+    `).get(normalizeAlias(alias));
+  } finally {
+    db.close();
+  }
+}
+
+export function upsertAlias(alias, game, createdBy, createdAt = new Date().toISOString()) {
+  const db = openDatabase();
+  const normalizedAlias = normalizeAlias(alias);
+  try {
+    db.prepare(`
+      INSERT INTO aliases (alias, game, created_by, created_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(alias) DO UPDATE SET
+        game = excluded.game,
+        created_by = excluded.created_by,
+        created_at = excluded.created_at
+    `).run(normalizedAlias, String(game).trim(), createdBy, createdAt);
+    return getAlias(normalizedAlias);
+  } finally {
+    db.close();
+  }
+}
+
+export function removeAlias(alias) {
+  const db = openDatabase();
+  try {
+    const result = db.prepare("DELETE FROM aliases WHERE alias = ?").run(normalizeAlias(alias));
+    return result.changes > 0;
+  } finally {
+    db.close();
+  }
+}
+
+export function listAliases(limit = 30) {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT alias, game, created_by AS createdBy, created_at AS createdAt
+      FROM aliases
+      ORDER BY alias ASC
+      LIMIT ?
+    `).all(limit);
+  } finally {
+    db.close();
+  }
 }
 
 function upsertGame(db, item, checkedAt) {
@@ -109,7 +179,29 @@ function getLastHistory(db, gameKey, storeId) {
   `).get(gameKey, String(storeId));
 }
 
-function shouldInsertHistory(db, deal) {
+function hasRecentSameDiscount(db, deal, checkedAt, maxAgeMs) {
+  if (!maxAgeMs) return false;
+
+  const since = new Date(new Date(checkedAt).getTime() - maxAgeMs).toISOString();
+  const row = db.prepare(`
+    SELECT id
+    FROM deal_history
+    WHERE game_key = ?
+      AND store_id = ?
+      AND checked_at >= ?
+      AND abs(savings_percent - ?) < 0.001
+    LIMIT 1
+  `).get(getGameKey(deal), String(deal.storeID), since, toNumber(deal.savings));
+
+  return Boolean(row);
+}
+
+function shouldInsertHistory(db, deal, checkedAt, options = {}) {
+  if (hasRecentSameDiscount(db, deal, checkedAt, options.sameDiscountCooldownMs)) {
+    return false;
+  }
+  if (options.sameDiscountCooldownMs) return true;
+
   const last = getLastHistory(db, getGameKey(deal), deal.storeID);
   if (!last) return true;
 
@@ -121,7 +213,7 @@ function shouldInsertHistory(db, deal) {
   );
 }
 
-export function recordDealHistories(items, checkedAt = new Date().toISOString()) {
+export function recordDealHistories(items, checkedAt = new Date().toISOString(), options = {}) {
   if (items.length === 0) return new Map();
 
   const db = openDatabase();
@@ -150,7 +242,7 @@ export function recordDealHistories(items, checkedAt = new Date().toISOString())
       const gameKey = getGameKey(deal);
       upsertGame(db, item, checkedAt);
 
-      if (!shouldInsertHistory(db, deal)) {
+      if (!shouldInsertHistory(db, deal, checkedAt, options)) {
         const key = `${gameKey}:${deal.storeID}`;
         if (!saved.has(key)) saved.set(key, false);
         continue;
@@ -180,6 +272,12 @@ export function recordDealHistories(items, checkedAt = new Date().toISOString())
   }
 
   return saved;
+}
+
+export function recordDealLookupHistory(item, checkedAt = new Date().toISOString()) {
+  return recordDealHistories([item], checkedAt, {
+    sameDiscountCooldownMs: ONE_WEEK_MS,
+  });
 }
 
 export function getDealHistory(deal, limit = 20) {

@@ -66,6 +66,9 @@ Discord 채팅방에서 사용:
 ```text
 /deal game:Elden Ring
 /history game:Elden Ring
+/alias-add alias:엘든왕 game:Elden Ring
+/alias-list
+/alias-remove alias:엘든왕
 ```
 
 ## 동작
@@ -86,7 +89,10 @@ Discord 채팅방에서 사용:
 - `npm run dry-run`은 Discord 토큰 없이 후보 딜과 AAA 판별 사유를 콘솔에 출력합니다.
 - `npm run dry-run:all`은 이미 보낸 딜까지 포함해서 개발용으로 전체 후보를 확인합니다.
 - `/deal`은 CheapShark에서 특정 게임의 현재 최저 할인 정보를 조회해 카드로 보여줍니다.
+- `/deal` 결과는 본인만 볼 수 있으며, 카드의 공유 버튼을 누르면 채널에 공개 메시지와 스레드를 만듭니다.
 - `/history`는 `data/deals.sqlite`에 저장된 특정 게임의 할인 기록과 그래프를 보여줍니다.
+- `/alias-add`는 채팅방 사용자가 누구나 사용할 수 있고, `/alias-remove`는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.
+- 채팅에서 추가한 기본 별칭은 `data/deals.sqlite`에 저장되고 `/deal` 검색어 보정에 우선 사용됩니다.
 
 ## AAA 판별
 

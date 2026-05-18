@@ -40,6 +40,25 @@ function formatHistoryPrice(value, currency, usdToKrw) {
   return `${formatKrw(value, usdToKrw)} (${usdFormatter.format(Number(value))})`;
 }
 
+function formatHistoryDate(value) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatSingleHistory(history, usdToKrw) {
+  const [record] = history ?? [];
+  if (!record) return "이전 할인 정보가 없습니다.";
+
+  return [
+    `${formatHistoryDate(record.checkedAt)}`,
+    `${Math.round(Number(record.savingsPercent))}%`,
+    `${formatHistoryPrice(record.salePriceUsd, record.priceCurrency, usdToKrw)}`,
+  ].join(" · ");
+}
+
 export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options = {}) {
   const discount = Math.round(Number(deal.savings));
   const dealUrl = deal.storeUrl ? new URL(deal.storeUrl) : new URL(CHEAPSHARK_REDIRECT);
@@ -80,8 +99,8 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
         inline: true,
       },
       {
-        name: "AAA 판별",
-        value: aaaReason,
+        name: options.lookupLabel ? "조회 기준" : "AAA 판별",
+        value: options.lookupLabel ?? aaaReason,
         inline: false,
       },
       {
@@ -92,14 +111,12 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
         inline: false,
       },
     )
-    .setFooter({ text: "Sale Pad AAA 할인 알림" })
+    .setFooter({ text: options.footerText ?? "Sale Pad AAA 할인 알림" })
     .setTimestamp(new Date());
 
   embed.addFields({
     name: "할인 기록",
-    value: options.hasHistoryChart
-      ? `${options.historyCount}개 기록 저장됨 · 그래프 첨부`
-      : "이전 할인 정보가 없습니다.",
+    value: options.hasHistoryChart ? `${options.historyCount}개 기록 저장됨 · 그래프 첨부` : formatSingleHistory(options.history, usdToKrw),
     inline: false,
   });
 
@@ -141,7 +158,7 @@ export function buildHistoryEmbed(game, history, options = {}) {
 
   embed.addFields({
     name: "그래프",
-    value: options.hasHistoryChart ? "할인 기록 그래프 첨부" : "이전 할인 정보가 없습니다.",
+    value: options.hasHistoryChart ? "할인 기록 그래프 첨부" : formatSingleHistory(history, options.usdToKrw),
     inline: false,
   });
 

@@ -19,6 +19,33 @@ export const slashCommands = [
         .setDescription("조회할 게임 이름")
         .setRequired(true),
     ),
+  new SlashCommandBuilder()
+    .setName("alias-add")
+    .setDescription("게임 검색 별칭을 추가하거나 수정합니다.")
+    .addStringOption((option) =>
+      option
+        .setName("alias")
+        .setDescription("사용자가 입력할 별칭")
+        .setRequired(true),
+    )
+    .addStringOption((option) =>
+      option
+        .setName("game")
+        .setDescription("실제로 검색할 게임 이름")
+        .setRequired(true),
+    ),
+  new SlashCommandBuilder()
+    .setName("alias-list")
+    .setDescription("등록된 게임 검색 별칭을 보여줍니다."),
+  new SlashCommandBuilder()
+    .setName("alias-remove")
+    .setDescription("게임 검색 별칭을 삭제합니다.")
+    .addStringOption((option) =>
+      option
+        .setName("alias")
+        .setDescription("삭제할 별칭")
+        .setRequired(true),
+    ),
 ];
 
 export const commandPayloads = slashCommands.map((command) => command.toJSON());

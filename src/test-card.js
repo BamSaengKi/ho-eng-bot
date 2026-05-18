@@ -41,6 +41,15 @@ client.once(Events.ClientReady, async () => {
       {
         hasHistoryChart: false,
         historyCount: 1,
+        history: [
+          {
+            checkedAt: new Date().toISOString(),
+            salePriceUsd: 39.99,
+            priceCurrency: "USD",
+            savingsPercent: 33.34,
+          },
+        ],
+        footerText: "오늘의 할인 정보",
       },
     );
 
