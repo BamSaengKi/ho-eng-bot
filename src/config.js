@@ -19,7 +19,6 @@ export const AAA_COMPANIES = [
   "Deep Silver",
   "Devolver Digital",
   "Electronic Arts",
-  "Focus Entertainment",
   "FromSoftware",
   "IO Interactive",
   "Koei Tecmo",

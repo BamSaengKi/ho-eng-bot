@@ -7,8 +7,10 @@ import { generateDiscountHistoryChartPng } from "./chart.js";
 import { classifyAaaGame } from "./classifier.js";
 import { REQUESTED_STORES } from "./config.js";
 import { buildDealEmbed } from "./discord.js";
+import { handleHelpMessage } from "./help.js";
 import { getDealHistory, getGameKey, recordDealHistories } from "./history.js";
 import { handleInteraction } from "./interactions.js";
+import { postWatchDeals } from "./watch.js";
 import {
   applySteamRegionalPrice,
   getSteamRegionOptions,
@@ -237,6 +239,20 @@ async function postDailyDeals(client) {
   console.log(`[info] Posted ${deals.length} deals.`);
 }
 
+async function postScheduledNotifications(client) {
+  try {
+    await postDailyDeals(client);
+  } catch (error) {
+    console.error("[error] Scheduled daily post failed:", error);
+  }
+
+  try {
+    await postWatchDeals(client, config);
+  } catch (error) {
+    console.error("[error] Scheduled watch post failed:", error);
+  }
+}
+
 async function main() {
   assertConfig();
 
@@ -247,14 +263,18 @@ async function main() {
   }
 
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
   });
 
   client.once(Events.ClientReady, async () => {
     console.log(`[info] Logged in as ${client.user.tag}`);
 
     if (config.once) {
-      await postDailyDeals(client);
+      await postScheduledNotifications(client);
       await client.destroy();
       return;
     }
@@ -262,9 +282,7 @@ async function main() {
     cron.schedule(
       config.schedule,
       () => {
-        postDailyDeals(client).catch((error) => {
-          console.error("[error] Scheduled post failed:", error);
-        });
+        postScheduledNotifications(client);
       },
       {
         timezone: config.timezone,
@@ -276,6 +294,12 @@ async function main() {
   client.on("interactionCreate", (interaction) => {
     handleInteraction(interaction, config).catch((error) => {
       console.error("[error] Interaction handler failed:", error);
+    });
+  });
+
+  client.on(Events.MessageCreate, (message) => {
+    handleHelpMessage(message).catch((error) => {
+      console.error("[error] Help message handler failed:", error);
     });
   });
 

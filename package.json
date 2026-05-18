@@ -11,7 +11,7 @@
     "dry-run:all": "node src/index.js --dry-run --include-sent",
     "register-commands": "node src/register-commands.js",
     "test-card": "node src/test-card.js",
-    "check": "node --check src/index.js && node --check src/api.js && node --check src/chart.js && node --check src/classifier.js && node --check src/commands.js && node --check src/config.js && node --check src/discord.js && node --check src/history.js && node --check src/interactions.js && node --check src/query-normalizer.js && node --check src/region.js && node --check src/register-commands.js && node --check src/search.js && node --check src/storage.js && node --check src/test-card.js"
+    "check": "node --check src/index.js && node --check src/api.js && node --check src/chart.js && node --check src/classifier.js && node --check src/commands.js && node --check src/config.js && node --check src/discord.js && node --check src/help.js && node --check src/history.js && node --check src/interactions.js && node --check src/query-normalizer.js && node --check src/region.js && node --check src/register-commands.js && node --check src/search.js && node --check src/storage.js && node --check src/test-card.js && node --check src/watch.js"
   },
   "dependencies": {
     "discord.js": "^14.19.3",

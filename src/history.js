@@ -74,12 +74,208 @@ function openDatabase() {
       created_by TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS watchlist (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      game_key TEXT NOT NULL,
+      query TEXT NOT NULL,
+      title TEXT NOT NULL,
+      steam_app_id TEXT,
+      game_id TEXT,
+      created_at TEXT NOT NULL,
+      UNIQUE(user_id, game_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS watch_notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      game_key TEXT NOT NULL,
+      store_id TEXT NOT NULL,
+      sale_price REAL NOT NULL,
+      price_currency TEXT NOT NULL DEFAULT 'USD',
+      savings_percent REAL NOT NULL,
+      notified_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_watch_notifications_recent
+      ON watch_notifications (user_id, game_key, store_id, notified_at);
   `);
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
     db.exec("ALTER TABLE deal_history ADD COLUMN price_currency TEXT NOT NULL DEFAULT 'USD'");
   }
   return db;
+}
+
+export function getGameKeyFromSearchResult(game) {
+  if (game.steamAppID) return `steam:${game.steamAppID}`;
+  if (game.gameID) return `cheapshark:${game.gameID}`;
+  return `title:${normalizeTitle(game.external)}`;
+}
+
+export function addWatchSubscription(userId, game, query, createdAt = new Date().toISOString()) {
+  const db = openDatabase();
+  const gameKey = getGameKeyFromSearchResult(game);
+  try {
+    db.prepare(`
+      INSERT INTO watchlist (
+        user_id,
+        game_key,
+        query,
+        title,
+        steam_app_id,
+        game_id,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id, game_key) DO UPDATE SET
+        query = excluded.query,
+        title = excluded.title,
+        steam_app_id = excluded.steam_app_id,
+        game_id = excluded.game_id,
+        created_at = excluded.created_at
+    `).run(
+      userId,
+      gameKey,
+      query,
+      game.external,
+      game.steamAppID || null,
+      game.gameID || null,
+      createdAt,
+    );
+
+    return {
+      userId,
+      gameKey,
+      query,
+      title: game.external,
+      steamAppId: game.steamAppID || null,
+      gameId: game.gameID || null,
+      createdAt,
+    };
+  } finally {
+    db.close();
+  }
+}
+
+export function listWatchSubscriptions(userId) {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT
+        user_id AS userId,
+        game_key AS gameKey,
+        query,
+        title,
+        steam_app_id AS steamAppId,
+        game_id AS gameId,
+        created_at AS createdAt
+      FROM watchlist
+      WHERE user_id = ?
+      ORDER BY title ASC
+    `).all(userId);
+  } finally {
+    db.close();
+  }
+}
+
+export function listAllWatchSubscriptions() {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT
+        user_id AS userId,
+        game_key AS gameKey,
+        query,
+        title,
+        steam_app_id AS steamAppId,
+        game_id AS gameId,
+        created_at AS createdAt
+      FROM watchlist
+      ORDER BY user_id ASC, title ASC
+    `).all();
+  } finally {
+    db.close();
+  }
+}
+
+export function removeWatchSubscription(userId, query) {
+  const watches = listWatchSubscriptions(userId);
+  const normalized = normalizeAlias(query);
+  const match = watches.find((watch) =>
+    normalizeAlias(watch.title) === normalized ||
+    normalizeAlias(watch.query) === normalized ||
+    watch.gameKey === query,
+  );
+  if (!match) return null;
+
+  const db = openDatabase();
+  try {
+    db.prepare("DELETE FROM watchlist WHERE user_id = ? AND game_key = ?").run(userId, match.gameKey);
+    return match;
+  } finally {
+    db.close();
+  }
+}
+
+export function hasRecentWatchNotification(userId, deal, maxAgeMs = ONE_WEEK_MS, checkedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    const since = new Date(new Date(checkedAt).getTime() - maxAgeMs).toISOString();
+    const row = db.prepare(`
+      SELECT id
+      FROM watch_notifications
+      WHERE user_id = ?
+        AND game_key = ?
+        AND store_id = ?
+        AND notified_at >= ?
+        AND abs(savings_percent - ?) < 0.001
+        AND abs(sale_price - ?) < 0.001
+        AND price_currency = ?
+      LIMIT 1
+    `).get(
+      userId,
+      getGameKey(deal),
+      String(deal.storeID),
+      since,
+      toNumber(deal.savings),
+      toNumber(deal.salePrice),
+      deal.priceCurrency || "USD",
+    );
+
+    return Boolean(row);
+  } finally {
+    db.close();
+  }
+}
+
+export function recordWatchNotification(userId, deal, notifiedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT INTO watch_notifications (
+        user_id,
+        game_key,
+        store_id,
+        sale_price,
+        price_currency,
+        savings_percent,
+        notified_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      userId,
+      getGameKey(deal),
+      String(deal.storeID),
+      toNumber(deal.salePrice),
+      deal.priceCurrency || "USD",
+      toNumber(deal.savings),
+      notifiedAt,
+    );
+  } finally {
+    db.close();
+  }
 }
 
 export function getAlias(alias) {

@@ -71,6 +71,18 @@ export async function findBestCurrentDeal(query, config = {}) {
   return null;
 }
 
+export async function findCurrentDealFromStoredGame(watch, config = {}) {
+  const search = await searchCurrentDealCandidates(watch.title ?? watch.query);
+  const candidate = search.candidates.find((game) =>
+    (watch.steamAppId && String(game.steamAppID) === String(watch.steamAppId)) ||
+    (watch.gameId && String(game.gameID) === String(watch.gameId)) ||
+    normalize(game.external) === normalize(watch.title),
+  ) ?? search.candidates[0];
+
+  if (!candidate) return null;
+  return findCurrentDealFromGame(candidate, config);
+}
+
 export async function searchCurrentDealCandidates(query, limit = 10) {
   const resolved = resolveGameQuery(query);
   const queries = [...new Set([resolved.query, query])];
