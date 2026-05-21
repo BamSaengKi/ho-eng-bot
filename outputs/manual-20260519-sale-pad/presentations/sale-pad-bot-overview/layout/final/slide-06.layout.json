@@ -1,0 +1,1463 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/olapkr",
+    "id": "olapkr",
+    "slide": 6,
+    "layoutId": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ji5snelo",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#F6F3EC",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/c3ylc7u5",
+      "id": "2",
+      "bbox": [
+        64,
+        52,
+        520,
+        26
+      ],
+      "geometry": "rect",
+      "text": "DATA MODEL",
+      "textPreview": "DATA MODEL",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DATA MODEL"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DATA MODEL",
+          "runs": [
+            {
+              "index": 1,
+              "text": "DATA MODEL",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1kre1w7m",
+      "id": "3",
+      "bbox": [
+        64,
+        92,
+        790,
+        104
+      ],
+      "geometry": "rect",
+      "text": "기록은 알림 품질을 높이는 기억 장치다",
+      "textPreview": "기록은 알림 품질을 높이는 기억 장치다",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "fontSize": 46,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "기록은 알림 품질을 높이는 기억 장치다"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "기록은 알림 품질을 높이는 기억 장치다",
+          "runs": [
+            {
+              "index": 1,
+              "text": "기록은 알림 품질을 높이는 기억 장치다",
+              "fontSize": 46,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ulwval87",
+      "id": "4",
+      "bbox": [
+        66,
+        198,
+        710,
+        58
+      ],
+      "geometry": "rect",
+      "text": "같은 할인 반복을 줄이고, 다음 카드에서 과거 할인 맥락을 보여주기 위해 SQLite에 필요한 상태를 보관합니다.",
+      "textPreview": "같은 할인 반복을 줄이고, 다음 카드에서 과거 할인 맥락을 보여주기 위해 SQLite에 필요한 상태를 보관합니다.",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "fontSize": 19,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "같은 할인 반복을 줄이고, 다음 카드에서 과거 할인 맥락을 보여주기 위해 SQLite에 필요한"
+          },
+          {
+            "index": 2,
+            "text": "상태를 보관합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "같은 할인 반복을 줄이고, 다음 카드에서 과거 할인 맥락을 보여주기 위해 SQLite에 필요한 상태를 보관합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "같은 할인 반복을 줄이고, 다음 카드에서 과거 할인 맥락을 보여주기 위해 SQLite에 필요한 상태를 보관합니다.",
+              "fontSize": 19,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j6tovaho",
+      "id": "5",
+      "bbox": [
+        88,
+        304,
+        196,
+        168
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/crmhk3q5",
+      "id": "6",
+      "bbox": [
+        88,
+        304,
+        7,
+        168
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cfa9w3m",
+      "id": "7",
+      "bbox": [
+        110,
+        320,
+        160,
+        26
+      ],
+      "geometry": "rect",
+      "text": "games",
+      "textPreview": "games",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "games"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "games",
+          "runs": [
+            {
+              "index": 1,
+              "text": "games",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qh0fepkz",
+      "id": "8",
+      "bbox": [
+        110,
+        354,
+        160,
+        96
+      ],
+      "geometry": "rect",
+      "text": "game_key\ntitle\nsteam_app_id\ngame_id",
+      "textPreview": "game_key | title | steam_app_id | game_id",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "game_key"
+          },
+          {
+            "index": 2,
+            "text": "title"
+          },
+          {
+            "index": 3,
+            "text": "steam_app_id"
+          },
+          {
+            "index": 4,
+            "text": "game_id"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "game_key",
+          "runs": [
+            {
+              "index": 1,
+              "text": "game_key",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "title",
+          "runs": [
+            {
+              "index": 1,
+              "text": "title",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "steam_app_id",
+          "runs": [
+            {
+              "index": 1,
+              "text": "steam_app_id",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "game_id",
+          "runs": [
+            {
+              "index": 1,
+              "text": "game_id",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2t83itg",
+      "id": "9",
+      "bbox": [
+        352,
+        270,
+        240,
+        224
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/byhgn29g",
+      "id": "10",
+      "bbox": [
+        352,
+        270,
+        7,
+        224
+      ],
+      "geometry": "rect",
+      "fillColor": "#FF7A5F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/idonyd0z",
+      "id": "11",
+      "bbox": [
+        374,
+        286,
+        204,
+        26
+      ],
+      "geometry": "rect",
+      "text": "deal_history",
+      "textPreview": "deal_history",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "deal_history"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "deal_history",
+          "runs": [
+            {
+              "index": 1,
+              "text": "deal_history",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t47y1kre",
+      "id": "12",
+      "bbox": [
+        374,
+        320,
+        204,
+        152
+      ],
+      "geometry": "rect",
+      "text": "checked_at\nsale_price\nnormal_price\nsavings_percent\nprice_currency",
+      "textPreview": "checked_at | sale_price | normal_price | savings_percent | price_currency",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "checked_at"
+          },
+          {
+            "index": 2,
+            "text": "sale_price"
+          },
+          {
+            "index": 3,
+            "text": "normal_price"
+          },
+          {
+            "index": 4,
+            "text": "savings_percent"
+          },
+          {
+            "index": 5,
+            "text": "price_currency"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "checked_at",
+          "runs": [
+            {
+              "index": 1,
+              "text": "checked_at",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "sale_price",
+          "runs": [
+            {
+              "index": 1,
+              "text": "sale_price",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "normal_price",
+          "runs": [
+            {
+              "index": 1,
+              "text": "normal_price",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "savings_percent",
+          "runs": [
+            {
+              "index": 1,
+              "text": "savings_percent",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "price_currency",
+          "runs": [
+            {
+              "index": 1,
+              "text": "price_currency",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0je9cvix",
+      "id": "13",
+      "bbox": [
+        660,
+        304,
+        196,
+        168
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b6xkf6dc",
+      "id": "14",
+      "bbox": [
+        660,
+        304,
+        7,
+        168
+      ],
+      "geometry": "rect",
+      "fillColor": "#F1C453",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/il0rqd4v",
+      "id": "15",
+      "bbox": [
+        682,
+        320,
+        160,
+        26
+      ],
+      "geometry": "rect",
+      "text": "aliases",
+      "textPreview": "aliases",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "aliases"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "aliases",
+          "runs": [
+            {
+              "index": 1,
+              "text": "aliases",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tcj6tova",
+      "id": "16",
+      "bbox": [
+        682,
+        354,
+        160,
+        96
+      ],
+      "geometry": "rect",
+      "text": "alias\ngame\ncreated_by",
+      "textPreview": "alias | game | created_by",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "alias"
+          },
+          {
+            "index": 2,
+            "text": "game"
+          },
+          {
+            "index": 3,
+            "text": "created_by"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "alias",
+          "runs": [
+            {
+              "index": 1,
+              "text": "alias",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "game",
+          "runs": [
+            {
+              "index": 1,
+              "text": "game",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "created_by",
+          "runs": [
+            {
+              "index": 1,
+              "text": "created_by",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0rqd4vmt",
+      "id": "17",
+      "bbox": [
+        924,
+        252,
+        214,
+        134
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bi9s36hc",
+      "id": "18",
+      "bbox": [
+        924,
+        252,
+        7,
+        134
+      ],
+      "geometry": "rect",
+      "fillColor": "#315F9D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ixczed8v",
+      "id": "19",
+      "bbox": [
+        946,
+        268,
+        178,
+        26
+      ],
+      "geometry": "rect",
+      "text": "watchlist",
+      "textPreview": "watchlist",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "watchlist"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "watchlist",
+          "runs": [
+            {
+              "index": 1,
+              "text": "watchlist",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/al87ed8b",
+      "id": "20",
+      "bbox": [
+        946,
+        302,
+        178,
+        62
+      ],
+      "geometry": "rect",
+      "text": "user_id\ngame_key\nquery\ntitle",
+      "textPreview": "user_id | game_key | query | title",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "user_id"
+          },
+          {
+            "index": 2,
+            "text": "game_key"
+          },
+          {
+            "index": 3,
+            "text": "query"
+          },
+          {
+            "index": 4,
+            "text": "title"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "user_id",
+          "runs": [
+            {
+              "index": 1,
+              "text": "user_id",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "game_key",
+          "runs": [
+            {
+              "index": 1,
+              "text": "game_key",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "query",
+          "runs": [
+            {
+              "index": 1,
+              "text": "query",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "title",
+          "runs": [
+            {
+              "index": 1,
+              "text": "title",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z61032ls",
+      "id": "21",
+      "bbox": [
+        924,
+        422,
+        214,
+        150
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/orytsvu9",
+      "id": "22",
+      "bbox": [
+        924,
+        422,
+        7,
+        150
+      ],
+      "geometry": "rect",
+      "fillColor": "#07675D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hcrmhk3q",
+      "id": "23",
+      "bbox": [
+        946,
+        438,
+        178,
+        26
+      ],
+      "geometry": "rect",
+      "text": "watch_notifications",
+      "textPreview": "watch_notifications",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "watch_notifications"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "watch_notifications",
+          "runs": [
+            {
+              "index": 1,
+              "text": "watch_notifications",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a9w3m94f",
+      "id": "24",
+      "bbox": [
+        946,
+        472,
+        178,
+        78
+      ],
+      "geometry": "rect",
+      "text": "user_id\ngame_key\nsale_price\nsavings_percent\nnotified_at",
+      "textPreview": "user_id | game_key | sale_price | savings_percent | notified_at",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "user_id"
+          },
+          {
+            "index": 2,
+            "text": "game_key"
+          },
+          {
+            "index": 3,
+            "text": "sale_price"
+          },
+          {
+            "index": 4,
+            "text": "savings_percent"
+          },
+          {
+            "index": 5,
+            "text": "notified_at"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "user_id",
+          "runs": [
+            {
+              "index": 1,
+              "text": "user_id",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "game_key",
+          "runs": [
+            {
+              "index": 1,
+              "text": "game_key",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "sale_price",
+          "runs": [
+            {
+              "index": 1,
+              "text": "sale_price",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "savings_percent",
+          "runs": [
+            {
+              "index": 1,
+              "text": "savings_percent",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "notified_at",
+          "runs": [
+            {
+              "index": 1,
+              "text": "notified_at",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zupwb2hw",
+      "id": "25",
+      "bbox": [
+        288,
+        384,
+        58,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sfil0rqd",
+      "id": "26",
+      "bbox": [
+        596,
+        384,
+        58,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#FF7A5F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h0fepkzu",
+      "id": "27",
+      "bbox": [
+        860,
+        348,
+        58,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#315F9D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/65wjudg7",
+      "id": "28",
+      "bbox": [
+        860,
+        500,
+        58,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#07675D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zqtcj6to",
+      "id": "29",
+      "bbox": [
+        86,
+        554,
+        170,
+        28
+      ],
+      "geometry": "rect",
+      "text": "중복 제어",
+      "textPreview": "중복 제어",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "fontSize": 17,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "중복 제어"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "중복 제어",
+          "runs": [
+            {
+              "index": 1,
+              "text": "중복 제어",
+              "fontSize": 17,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/psfil0rq",
+      "id": "30",
+      "bbox": [
+        86,
+        586,
+        960,
+        32
+      ],
+      "geometry": "rect",
+      "text": "deal 조회 기록은 동일 할인율 주 1회 제한, 개인 DM은 사용자·게임·스토어·할인율·가격 기준 주 1회 제한",
+      "textPreview": "deal 조회 기록은 동일 할인율 주 1회 제한, 개인 DM은 사용자·게임·스토어·할인율·가격 기준 주 1회 제한",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "deal 조회 기록은 동일 할인율 주 1회 제한, 개인 DM은 사용자·게임·스토어·할인율·가격 기준 주 1회 제한"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "deal 조회 기록은 동일 할인율 주 1회 제한, 개인 DM은 사용자·게임·스토어·할인율·가격 기준 주 1회 제한",
+          "runs": [
+            {
+              "index": 1,
+              "text": "deal 조회 기록은 동일 할인율 주 1회 제한, 개인 DM은 사용자·게임·스토어·할인율·가격 기준 주 1회 제한",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w7mp0bi9",
+      "id": "31",
+      "bbox": [
+        64,
+        662,
+        1152,
+        1.5
+      ],
+      "geometry": "rect",
+      "fillColor": "#CFDAD4",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7mp0bi9s",
+      "id": "32",
+      "bbox": [
+        64,
+        675,
+        360,
+        24
+      ],
+      "geometry": "rect",
+      "text": "Sale Pad Discord Bot",
+      "textPreview": "Sale Pad Discord Bot",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sale Pad Discord Bot"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sale Pad Discord Bot",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sale Pad Discord Bot",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1w7mp0b",
+      "id": "33",
+      "bbox": [
+        1168,
+        675,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "06",
+      "textPreview": "06",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "06"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "06",
+          "runs": [
+            {
+              "index": 1,
+              "text": "06",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

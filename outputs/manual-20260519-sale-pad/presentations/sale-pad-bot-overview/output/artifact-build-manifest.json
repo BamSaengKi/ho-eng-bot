@@ -1,0 +1,97 @@
+{
+  "output": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/output/sale-pad-discord-bot-overview.pptx",
+  "outputBytes": 44380,
+  "slideCount": 8,
+  "slideSize": {
+    "width": 1280,
+    "height": 720
+  },
+  "previewDir": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview",
+  "previewPaths": [
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-01.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-02.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-03.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-04.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-05.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-06.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-07.png",
+    "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/preview/slide-08.png"
+  ],
+  "layoutDir": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final",
+  "layoutResults": [
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-01.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-02.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-03.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-04.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-05.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-06.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-07.layout.json"
+    },
+    {
+      "layoutPath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/layout/final/slide-08.layout.json"
+    }
+  ],
+  "slides": [
+    {
+      "index": 1,
+      "requestedSlideNumber": 1,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-01.mjs",
+      "exportName": "slide01"
+    },
+    {
+      "index": 2,
+      "requestedSlideNumber": 2,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-02.mjs",
+      "exportName": "slide02"
+    },
+    {
+      "index": 3,
+      "requestedSlideNumber": 3,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-03.mjs",
+      "exportName": "slide03"
+    },
+    {
+      "index": 4,
+      "requestedSlideNumber": 4,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-04.mjs",
+      "exportName": "slide04"
+    },
+    {
+      "index": 5,
+      "requestedSlideNumber": 5,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-05.mjs",
+      "exportName": "slide05"
+    },
+    {
+      "index": 6,
+      "requestedSlideNumber": 6,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-06.mjs",
+      "exportName": "slide06"
+    },
+    {
+      "index": 7,
+      "requestedSlideNumber": 7,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-07.mjs",
+      "exportName": "slide07"
+    },
+    {
+      "index": 8,
+      "requestedSlideNumber": 8,
+      "modulePath": "/Users/bam/Documents/Codex/2026-05-15/new-chat/sale-pad-discord-bot/outputs/manual-20260519-sale-pad/presentations/sale-pad-bot-overview/slides/slide-08.mjs",
+      "exportName": "slide08"
+    }
+  ]
+}

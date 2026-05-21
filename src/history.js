@@ -3,7 +3,8 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { REQUESTED_STORES } from "./config.js";
 
-const DB_PATH = resolve("data", "deals.sqlite");
+const DATA_DIR = resolve(process.env.DATA_DIR || "data");
+const DB_PATH = resolve(process.env.DB_PATH || resolve(DATA_DIR, "deals.sqlite"));
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 function normalizeTitle(value) {
@@ -146,6 +147,7 @@ export function addWatchSubscription(userId, game, query, createdAt = new Date()
     );
 
     return {
+      id: db.prepare("SELECT id FROM watchlist WHERE user_id = ? AND game_key = ?").get(userId, gameKey)?.id,
       userId,
       gameKey,
       query,
@@ -164,6 +166,7 @@ export function listWatchSubscriptions(userId) {
   try {
     return db.prepare(`
       SELECT
+        id,
         user_id AS userId,
         game_key AS gameKey,
         query,
@@ -185,6 +188,7 @@ export function listAllWatchSubscriptions() {
   try {
     return db.prepare(`
       SELECT
+        id,
         user_id AS userId,
         game_key AS gameKey,
         query,
@@ -195,6 +199,27 @@ export function listAllWatchSubscriptions() {
       FROM watchlist
       ORDER BY user_id ASC, title ASC
     `).all();
+  } finally {
+    db.close();
+  }
+}
+
+export function getWatchSubscriptionById(id) {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT
+        id,
+        user_id AS userId,
+        game_key AS gameKey,
+        query,
+        title,
+        steam_app_id AS steamAppId,
+        game_id AS gameId,
+        created_at AS createdAt
+      FROM watchlist
+      WHERE id = ?
+    `).get(id);
   } finally {
     db.close();
   }

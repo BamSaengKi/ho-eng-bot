@@ -1,0 +1,1197 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/uuc0e3",
+    "id": "uuc0e3",
+    "slide": 3,
+    "layoutId": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/psfil0rq",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#F8FAF7",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1w7mp0b",
+      "id": "2",
+      "bbox": [
+        64,
+        52,
+        520,
+        26
+      ],
+      "geometry": "rect",
+      "text": "FEATURE MAP",
+      "textPreview": "FEATURE MAP",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "FEATURE MAP"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "FEATURE MAP",
+          "runs": [
+            {
+              "index": 1,
+              "text": "FEATURE MAP",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7mp0bi9s",
+      "id": "3",
+      "bbox": [
+        64,
+        92,
+        790,
+        104
+      ],
+      "geometry": "rect",
+      "text": "현재 구현된 기능",
+      "textPreview": "현재 구현된 기능",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "fontSize": 46,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "현재 구현된 기능"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "현재 구현된 기능",
+          "runs": [
+            {
+              "index": 1,
+              "text": "현재 구현된 기능",
+              "fontSize": 46,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wval87ed",
+      "id": "4",
+      "bbox": [
+        66,
+        198,
+        710,
+        58
+      ],
+      "geometry": "rect",
+      "text": "채널 공지, 개인 검색, 별칭, 히스토리, 개인 관심 게임이 하나의 DB와 카드 생성 흐름을 공유합니다.",
+      "textPreview": "채널 공지, 개인 검색, 별칭, 히스토리, 개인 관심 게임이 하나의 DB와 카드 생성 흐름을 공유합니다.",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "fontSize": 19,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "채널 공지, 개인 검색, 별칭, 히스토리, 개인 관심 게임이 하나의 DB와 카드 생성 흐름을"
+          },
+          {
+            "index": 2,
+            "text": "공유합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "채널 공지, 개인 검색, 별칭, 히스토리, 개인 관심 게임이 하나의 DB와 카드 생성 흐름을 공유합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "채널 공지, 개인 검색, 별칭, 히스토리, 개인 관심 게임이 하나의 DB와 카드 생성 흐름을 공유합니다.",
+              "fontSize": 19,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pg3ex0nu",
+      "id": "5",
+      "bbox": [
+        64,
+        290,
+        344,
+        150
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/epkzupwb",
+      "id": "6",
+      "bbox": [
+        64,
+        290,
+        344,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7adsji5s",
+      "id": "7",
+      "bbox": [
+        86,
+        314,
+        300,
+        34
+      ],
+      "geometry": "rect",
+      "text": "매일 자동 할인 공지",
+      "textPreview": "매일 자동 할인 공지",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "매일 자동 할인 공지"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "매일 자동 할인 공지",
+          "runs": [
+            {
+              "index": 1,
+              "text": "매일 자동 할인 공지",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wra5gbq1",
+      "id": "8",
+      "bbox": [
+        86,
+        358,
+        300,
+        54
+      ],
+      "geometry": "rect",
+      "text": "CheapShark와 Steam API를 조회해 조건에 맞는 AAA급 할인을 채널에 카드로 전송합니다. 없으면 오늘은 할인정보가 없어요. 메시지를 보냅니다.",
+      "textPreview": "CheapShark와 Steam API를 조회해 조건에 맞는 AAA급 할인을 채널에 카드로 전송합니다. 없으면 오늘은 할인정보가 없어요. 메시지를 보냅니다.",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CheapShark와 Steam API를 조회해 조건에 맞는"
+          },
+          {
+            "index": 2,
+            "text": "AAA급 할인을 채널에 카드로 전송합니다. 없으면"
+          },
+          {
+            "index": 3,
+            "text": "오늘은 할인정보가 없어요. 메시지를 보냅니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CheapShark와 Steam API를 조회해 조건에 맞는 AAA급 할인을 채널에 카드로 전송합니다. 없으면 오늘은 할인정보가 없어요. 메시지를 보냅니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "CheapShark와 Steam API를 조회해 조건에 맞는 AAA급 할인을 채널에 카드로 전송합니다. 없으면 오늘은 할인정보가 없어요. 메시지를 보냅니다.",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lc7u54zi",
+      "id": "9",
+      "bbox": [
+        468,
+        290,
+        344,
+        150
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9w3m94fu",
+      "id": "10",
+      "bbox": [
+        468,
+        290,
+        344,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#315F9D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kb6xkf6d",
+      "id": "11",
+      "bbox": [
+        490,
+        314,
+        300,
+        34
+      ],
+      "geometry": "rect",
+      "text": "개인 검색과 공유",
+      "textPreview": "개인 검색과 공유",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "개인 검색과 공유"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "개인 검색과 공유",
+          "runs": [
+            {
+              "index": 1,
+              "text": "개인 검색과 공유",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rqd4vmtw",
+      "id": "12",
+      "bbox": [
+        490,
+        358,
+        300,
+        54
+      ],
+      "geometry": "rect",
+      "text": "/deal 검색 결과는 본인만 보고, 버튼으로 공개 공유와 스레드 생성을 할 수 있습니다. 여러 후보는 선택 메뉴로 처리합니다.",
+      "textPreview": "/deal 검색 결과는 본인만 보고, 버튼으로 공개 공유와 스레드 생성을 할 수 있습니다. 여러 후보는 선택 메뉴로 처리합니다.",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "/deal 검색 결과는 본인만 보고, 버튼으로 공개 공유와"
+          },
+          {
+            "index": 2,
+            "text": "스레드 생성을 할 수 있습니다. 여러 후보는 선택"
+          },
+          {
+            "index": 3,
+            "text": "메뉴로 처리합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "/deal 검색 결과는 본인만 보고, 버튼으로 공개 공유와 스레드 생성을 할 수 있습니다. 여러 후보는 선택 메뉴로 처리합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "/deal 검색 결과는 본인만 보고, 버튼으로 공개 공유와 스레드 생성을 할 수 있습니다. 여러 후보는 선택 메뉴로 처리합니다.",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25kb6xkf",
+      "id": "13",
+      "bbox": [
+        872,
+        290,
+        344,
+        150
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9knih4by",
+      "id": "14",
+      "bbox": [
+        872,
+        290,
+        344,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#FF7A5F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzupwb2h",
+      "id": "15",
+      "bbox": [
+        894,
+        314,
+        300,
+        34
+      ],
+      "geometry": "rect",
+      "text": "할인 기록과 그래프",
+      "textPreview": "할인 기록과 그래프",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "할인 기록과 그래프"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "할인 기록과 그래프",
+          "runs": [
+            {
+              "index": 1,
+              "text": "할인 기록과 그래프",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1w7mp0",
+      "id": "16",
+      "bbox": [
+        894,
+        358,
+        300,
+        54
+      ],
+      "geometry": "rect",
+      "text": "할인율, 날짜, 할인가를 SQLite에 저장합니다. 기록 1개는 텍스트, 2개 이상은 PNG 그래프로 표시합니다.",
+      "textPreview": "할인율, 날짜, 할인가를 SQLite에 저장합니다. 기록 1개는 텍스트, 2개 이상은 PNG 그래프로 표시합니다.",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "할인율, 날짜, 할인가를 SQLite에 저장합니다. 기록"
+          },
+          {
+            "index": 2,
+            "text": "1개는 텍스트, 2개 이상은 PNG 그래프로 표시합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "할인율, 날짜, 할인가를 SQLite에 저장합니다. 기록 1개는 텍스트, 2개 이상은 PNG 그래프로 표시합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "할인율, 날짜, 할인가를 SQLite에 저장합니다. 기록 1개는 텍스트, 2개 이상은 PNG 그래프로 표시합니다.",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2t83itgf",
+      "id": "17",
+      "bbox": [
+        64,
+        482,
+        344,
+        122
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9gr2p8nq",
+      "id": "18",
+      "bbox": [
+        64,
+        482,
+        344,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#F1C453",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gvy90je9",
+      "id": "19",
+      "bbox": [
+        86,
+        506,
+        300,
+        34
+      ],
+      "geometry": "rect",
+      "text": "검색 별칭",
+      "textPreview": "검색 별칭",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "검색 별칭"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "검색 별칭",
+          "runs": [
+            {
+              "index": 1,
+              "text": "검색 별칭",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wra5gbq1",
+      "id": "20",
+      "bbox": [
+        86,
+        550,
+        300,
+        26
+      ],
+      "geometry": "rect",
+      "text": "한글 별칭과 오타 보정으로 Steam 영문명 검색을 도와줍니다. 추가는 누구나, 삭제는 관리자만 가능합니다.",
+      "textPreview": "한글 별칭과 오타 보정으로 Steam 영문명 검색을 도와줍니다. 추가는 누구나, 삭제는 관리자만 가능합니다.",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "한글 별칭과 오타 보정으로 Steam 영문명 검색을"
+          },
+          {
+            "index": 2,
+            "text": "도와줍니다. 추가는 누구나, 삭제는 관리자만"
+          },
+          {
+            "index": 3,
+            "text": "가능합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "한글 별칭과 오타 보정으로 Steam 영문명 검색을 도와줍니다. 추가는 누구나, 삭제는 관리자만 가능합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "한글 별칭과 오타 보정으로 Steam 영문명 검색을 도와줍니다. 추가는 누구나, 삭제는 관리자만 가능합니다.",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lc7u54zi",
+      "id": "21",
+      "bbox": [
+        468,
+        482,
+        344,
+        122
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/eloj2t83",
+      "id": "22",
+      "bbox": [
+        468,
+        482,
+        344,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#07675D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/36hcrmhk",
+      "id": "23",
+      "bbox": [
+        490,
+        506,
+        300,
+        34
+      ],
+      "geometry": "rect",
+      "text": "개인 관심 게임 DM",
+      "textPreview": "개인 관심 게임 DM",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "개인 관심 게임 DM"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "개인 관심 게임 DM",
+          "runs": [
+            {
+              "index": 1,
+              "text": "개인 관심 게임 DM",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wfyxobm5",
+      "id": "24",
+      "bbox": [
+        490,
+        550,
+        300,
+        26
+      ],
+      "geometry": "rect",
+      "text": "/watch-add로 등록한 게임은 AAA 여부와 별개로 매일 확인하고 할인 조건 충족 시 DM으로 카드와 기록을 보냅니다.",
+      "textPreview": "/watch-add로 등록한 게임은 AAA 여부와 별개로 매일 확인하고 할인 조건 충족 시 DM으로 카드와 기록을 보냅니다.",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "/watch-add로 등록한 게임은 AAA 여부와 별개로"
+          },
+          {
+            "index": 2,
+            "text": "매일 확인하고 할인 조건 충족 시 DM으로 카드와"
+          },
+          {
+            "index": 3,
+            "text": "기록을 보냅니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "/watch-add로 등록한 게임은 AAA 여부와 별개로 매일 확인하고 할인 조건 충족 시 DM으로 카드와 기록을 보냅니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "/watch-add로 등록한 게임은 AAA 여부와 별개로 매일 확인하고 할인 조건 충족 시 DM으로 카드와 기록을 보냅니다.",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0rqd4vm",
+      "id": "25",
+      "bbox": [
+        872,
+        482,
+        344,
+        122
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ed8bat47",
+      "id": "26",
+      "bbox": [
+        872,
+        482,
+        344,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#243B3A",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7u54zido",
+      "id": "27",
+      "bbox": [
+        894,
+        506,
+        300,
+        34
+      ],
+      "geometry": "rect",
+      "text": "운영 도움 기능",
+      "textPreview": "운영 도움 기능",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "운영 도움 기능"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "운영 도움 기능",
+          "runs": [
+            {
+              "index": 1,
+              "text": "운영 도움 기능",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w7mp0bi9",
+      "id": "28",
+      "bbox": [
+        894,
+        550,
+        300,
+        26
+      ],
+      "geometry": "rect",
+      "text": "/사용법, slash command 등록 스크립트, dry-run, run-once, pm2 운영 흐름을 갖췄습니다.",
+      "textPreview": "/사용법, slash command 등록 스크립트, dry-run, run-once, pm2 운영 흐름을 갖췄습니다.",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "/사용법, slash command 등록 스크립트, dry-run,"
+          },
+          {
+            "index": 2,
+            "text": "run-once, pm2 운영 흐름을 갖췄습니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "/사용법, slash command 등록 스크립트, dry-run, run-once, pm2 운영 흐름을 갖췄습니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "/사용법, slash command 등록 스크립트, dry-run, run-once, pm2 운영 흐름을 갖췄습니다.",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/psfil0rq",
+      "id": "29",
+      "bbox": [
+        64,
+        662,
+        1152,
+        1.5
+      ],
+      "geometry": "rect",
+      "fillColor": "#CFDAD4",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fil0rqd4",
+      "id": "30",
+      "bbox": [
+        64,
+        675,
+        360,
+        24
+      ],
+      "geometry": "rect",
+      "text": "Sale Pad Discord Bot",
+      "textPreview": "Sale Pad Discord Bot",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sale Pad Discord Bot"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sale Pad Discord Bot",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sale Pad Discord Bot",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qxs72x4n",
+      "id": "31",
+      "bbox": [
+        1168,
+        675,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "03",
+      "textPreview": "03",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "03"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "03",
+          "runs": [
+            {
+              "index": 1,
+              "text": "03",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

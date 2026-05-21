@@ -27,6 +27,57 @@ DISCORD_GUILD_ID=...
 REGION=KR
 REGION_STRICT=true
 STEAM_LANGUAGE=korean
+DATA_DIR=data
+DB_PATH=data/deals.sqlite
+```
+
+## 개발용 환경
+
+운영 봇과 개발 봇은 Discord 앱, 채널, 데이터 경로를 분리하는 것을 권장합니다.
+
+```bash
+cp .env.development.example .env.development
+```
+
+`.env.development`에는 개발용 Discord 앱 토큰과 테스트 채널 ID를 넣습니다.
+
+```env
+DISCORD_TOKEN=개발봇토큰
+DISCORD_CHANNEL_ID=테스트채널ID
+DISCORD_CLIENT_ID=개발봇CLIENTID
+DISCORD_GUILD_ID=테스트서버ID
+DATA_DIR=data-dev
+DB_PATH=data-dev/deals.dev.sqlite
+```
+
+개발용 slash command 등록:
+
+```bash
+npm run register-commands:dev
+```
+
+개발 봇이 설정된 서버/채널에 접근 가능한지 확인:
+
+```bash
+npm run env-check:dev
+```
+
+개발용 봇 실행:
+
+```bash
+npm run start:dev
+```
+
+개발용으로 한 번만 전송 테스트:
+
+```bash
+npm run run-once:dev
+```
+
+개인 관심 게임 알림이 왜 발송되지 않았는지 확인:
+
+```bash
+npm run watch-check
 ```
 
 ## 실행
@@ -97,10 +148,12 @@ Discord 채팅방에서 사용:
 - `/history`는 `data/deals.sqlite`에 저장된 특정 게임의 할인 기록과 그래프를 보여줍니다.
 - `/alias-add`는 채팅방 사용자가 누구나 사용할 수 있고, `/alias-remove`는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.
 - 채팅에서 추가한 기본 별칭은 `data/deals.sqlite`에 저장되고 `/deal` 검색어 보정에 우선 사용됩니다.
-- `/watch-add`는 개인 관심 게임을 등록하고, 매일 자동 조회 때 할인 조건에 맞으면 DM으로 카드와 할인 기록을 보냅니다.
+- `/watch-add`는 개인 관심 게임을 등록하고, 매일 자동 조회 때 할인 조건에 맞으면 공지 채널 뉴스레터에 카드와 할인 기록을 보냅니다.
 - `/watch-list`, `/watch-remove`로 내 관심 게임을 확인하거나 삭제합니다.
-- 관심 게임 DM도 `data/deals.sqlite`의 할인 기록을 사용하며 기록이 2개 이상이면 그래프를 첨부합니다.
-- 같은 사용자/게임/스토어에서 같은 할인율과 가격은 1주일에 1번만 DM으로 보냅니다.
+- 관심 게임 알림도 `data/deals.sqlite`의 할인 기록을 사용하며 기록이 2개 이상이면 그래프를 첨부합니다.
+- 관심 게임 알림은 하루 단위 뉴스레터 메시지로 묶고, 유저를 멘션한 뒤 스레드를 만듭니다.
+- 같은 사용자/게임/스토어에서 같은 할인율과 가격은 1주일에 1번만 채널 알림으로 보냅니다.
+- `ITAD_API_KEY`가 있으면 IsThereAnyDeal에서 Steam 할인 종료일을 보조 조회해 카드에 표시합니다. 실패하거나 키가 없으면 `확인 불가`로 표시합니다.
 - 채팅에 `/사용법`을 보내면 봇 사용법을 답장합니다. Discord 개발자 포털에서 Message Content Intent가 켜져 있어야 합니다.
 
 ## AAA 판별

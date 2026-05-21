@@ -1,0 +1,1114 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/68jrvi",
+    "id": "68jrvi",
+    "slide": 5,
+    "layoutId": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jqh0fepk",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#F7F1E8",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8bat47y1",
+      "id": "2",
+      "bbox": [
+        64,
+        52,
+        520,
+        26
+      ],
+      "geometry": "rect",
+      "text": "TECH STACK",
+      "textPreview": "TECH STACK",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TECH STACK"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TECH STACK",
+          "runs": [
+            {
+              "index": 1,
+              "text": "TECH STACK",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1w7mp0bi",
+      "id": "3",
+      "bbox": [
+        64,
+        92,
+        790,
+        104
+      ],
+      "geometry": "rect",
+      "text": "작게 유지하되, 필요한 곳은 검증 가능한 도구를 쓴다",
+      "textPreview": "작게 유지하되, 필요한 곳은 검증 가능한 도구를 쓴다",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "fontSize": 46,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "작게 유지하되, 필요한 곳은 검증 가능한"
+          },
+          {
+            "index": 2,
+            "text": "도구를 쓴다"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "작게 유지하되, 필요한 곳은 검증 가능한 도구를 쓴다",
+          "runs": [
+            {
+              "index": 1,
+              "text": "작게 유지하되, 필요한 곳은 검증 가능한 도구를 쓴다",
+              "fontSize": 46,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qh0fepkz",
+      "id": "4",
+      "bbox": [
+        66,
+        198,
+        710,
+        58
+      ],
+      "geometry": "rect",
+      "text": "API 조회, Discord 상호작용, SQLite 기록, sharp 그래프 생성으로 구성된 Node.js 기반 봇입니다.",
+      "textPreview": "API 조회, Discord 상호작용, SQLite 기록, sharp 그래프 생성으로 구성된 Node.js 기반 봇입니다.",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "fontSize": 19,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "API 조회, Discord 상호작용, SQLite 기록, sharp 그래프 생성으로 구성된 Node.js 기반"
+          },
+          {
+            "index": 2,
+            "text": "봇입니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "API 조회, Discord 상호작용, SQLite 기록, sharp 그래프 생성으로 구성된 Node.js 기반 봇입니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "API 조회, Discord 상호작용, SQLite 기록, sharp 그래프 생성으로 구성된 Node.js 기반 봇입니다.",
+              "fontSize": 19,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2t83itg",
+      "id": "5",
+      "bbox": [
+        80,
+        304,
+        210,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8nqxs72x",
+      "id": "6",
+      "bbox": [
+        80,
+        304,
+        7,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/18jqh0fe",
+      "id": "7",
+      "bbox": [
+        102,
+        320,
+        174,
+        26
+      ],
+      "geometry": "rect",
+      "text": "Runtime",
+      "textPreview": "Runtime",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Runtime"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Runtime",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Runtime",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ulwval87",
+      "id": "8",
+      "bbox": [
+        102,
+        354,
+        174,
+        66
+      ],
+      "geometry": "rect",
+      "text": "Node.js ESM\nnode-cron\npm2 운영",
+      "textPreview": "Node.js ESM | node-cron | pm2 운영",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Node.js ESM"
+          },
+          {
+            "index": 2,
+            "text": "node-cron"
+          },
+          {
+            "index": 3,
+            "text": "pm2 운영"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Node.js ESM",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Node.js ESM",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "node-cron",
+          "runs": [
+            {
+              "index": 1,
+              "text": "node-cron",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "pm2 운영",
+          "runs": [
+            {
+              "index": 1,
+              "text": "pm2 운영",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j6tovaho",
+      "id": "9",
+      "bbox": [
+        322,
+        304,
+        250,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2t83itg",
+      "id": "10",
+      "bbox": [
+        322,
+        304,
+        7,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#315F9D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qh0fepkz",
+      "id": "11",
+      "bbox": [
+        344,
+        320,
+        214,
+        26
+      ],
+      "geometry": "rect",
+      "text": "Discord",
+      "textPreview": "Discord",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Discord"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Discord",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Discord",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/18jqh0fe",
+      "id": "12",
+      "bbox": [
+        344,
+        354,
+        214,
+        66
+      ],
+      "geometry": "rect",
+      "text": "discord.js v14\nslash command\nembed, button, select menu, DM",
+      "textPreview": "discord.js v14 | slash command | embed, button, select menu, DM",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "discord.js v14"
+          },
+          {
+            "index": 2,
+            "text": "slash command"
+          },
+          {
+            "index": 3,
+            "text": "embed, button, select menu, DM"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "discord.js v14",
+          "runs": [
+            {
+              "index": 1,
+              "text": "discord.js v14",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "slash command",
+          "runs": [
+            {
+              "index": 1,
+              "text": "slash command",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "embed, button, select menu, DM",
+          "runs": [
+            {
+              "index": 1,
+              "text": "embed, button, select menu, DM",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8nqxs72x",
+      "id": "13",
+      "bbox": [
+        604,
+        304,
+        250,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jqh0fepk",
+      "id": "14",
+      "bbox": [
+        604,
+        304,
+        7,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#FF7A5F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q5o7qpg3",
+      "id": "15",
+      "bbox": [
+        626,
+        320,
+        214,
+        26
+      ],
+      "geometry": "rect",
+      "text": "Data/API",
+      "textPreview": "Data/API",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Data/API"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Data/API",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Data/API",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1w7mp0bi",
+      "id": "16",
+      "bbox": [
+        626,
+        354,
+        214,
+        66
+      ],
+      "geometry": "rect",
+      "text": "CheapShark deals/search\nSteam appdetails cc=KR\n환율 fallback",
+      "textPreview": "CheapShark deals/search | Steam appdetails cc=KR | 환율 fallback",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CheapShark deals/search"
+          },
+          {
+            "index": 2,
+            "text": "Steam appdetails cc=KR"
+          },
+          {
+            "index": 3,
+            "text": "환율 fallback"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CheapShark deals/search",
+          "runs": [
+            {
+              "index": 1,
+              "text": "CheapShark deals/search",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Steam appdetails cc=KR",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Steam appdetails cc=KR",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "환율 fallback",
+          "runs": [
+            {
+              "index": 1,
+              "text": "환율 fallback",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8bat47y1",
+      "id": "17",
+      "bbox": [
+        886,
+        304,
+        250,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ji5snelo",
+      "id": "18",
+      "bbox": [
+        886,
+        304,
+        7,
+        138
+      ],
+      "geometry": "rect",
+      "fillColor": "#F1C453",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/uxc3ylc7",
+      "id": "19",
+      "bbox": [
+        908,
+        320,
+        214,
+        26
+      ],
+      "geometry": "rect",
+      "text": "Storage",
+      "textPreview": "Storage",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Storage"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Storage",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Storage",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2t83itgf",
+      "id": "20",
+      "bbox": [
+        908,
+        354,
+        214,
+        66
+      ],
+      "geometry": "rect",
+      "text": "node:sqlite\n할인 기록\n별칭\n개인 관심 게임",
+      "textPreview": "node:sqlite | 할인 기록 | 별칭 | 개인 관심 게임",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "node:sqlite"
+          },
+          {
+            "index": 2,
+            "text": "할인 기록"
+          },
+          {
+            "index": 3,
+            "text": "별칭"
+          },
+          {
+            "index": 4,
+            "text": "개인 관심 게임"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "node:sqlite",
+          "runs": [
+            {
+              "index": 1,
+              "text": "node:sqlite",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "할인 기록",
+          "runs": [
+            {
+              "index": 1,
+              "text": "할인 기록",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "별칭",
+          "runs": [
+            {
+              "index": 1,
+              "text": "별칭",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "개인 관심 게임",
+          "runs": [
+            {
+              "index": 1,
+              "text": "개인 관심 게임",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1w7mp0",
+      "id": "21",
+      "bbox": [
+        80,
+        500,
+        1056,
+        64
+      ],
+      "geometry": "rect",
+      "fillColor": "#07675D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzupwb2h",
+      "id": "22",
+      "bbox": [
+        104,
+        518,
+        1008,
+        28
+      ],
+      "geometry": "rect",
+      "text": "그래프 생성은 AI 토큰 없이 sharp 기반 SVG→PNG 렌더링으로 처리",
+      "textPreview": "그래프 생성은 AI 토큰 없이 sharp 기반 SVG→PNG 렌더링으로 처리",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "fontSize": 22,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "그래프 생성은 AI 토큰 없이 sharp 기반 SVG→PNG 렌더링으로 처리"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "그래프 생성은 AI 토큰 없이 sharp 기반 SVG→PNG 렌더링으로 처리",
+          "runs": [
+            {
+              "index": 1,
+              "text": "그래프 생성은 AI 토큰 없이 sharp 기반 SVG→PNG 렌더링으로 처리",
+              "fontSize": 22,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9knih4by",
+      "id": "23",
+      "bbox": [
+        64,
+        662,
+        1152,
+        1.5
+      ],
+      "geometry": "rect",
+      "fillColor": "#CFDAD4",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25kb6xkf",
+      "id": "24",
+      "bbox": [
+        64,
+        675,
+        360,
+        24
+      ],
+      "geometry": "rect",
+      "text": "Sale Pad Discord Bot",
+      "textPreview": "Sale Pad Discord Bot",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sale Pad Discord Bot"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sale Pad Discord Bot",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sale Pad Discord Bot",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rqd4vmtw",
+      "id": "25",
+      "bbox": [
+        1168,
+        675,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "05",
+      "textPreview": "05",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "05"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "05",
+          "runs": [
+            {
+              "index": 1,
+              "text": "05",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

@@ -48,7 +48,7 @@ export const slashCommands = [
     ),
   new SlashCommandBuilder()
     .setName("watch-add")
-    .setDescription("개인 관심 게임을 등록하고 할인 시 DM으로 알림을 받습니다.")
+    .setDescription("개인 관심 게임을 등록하고 할인 시 채널 알림을 받습니다.")
     .addStringOption((option) =>
       option
         .setName("game")

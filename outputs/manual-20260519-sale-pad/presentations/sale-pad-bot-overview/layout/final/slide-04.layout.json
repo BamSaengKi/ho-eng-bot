@@ -1,0 +1,1535 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/l68433",
+    "id": "l68433",
+    "slide": 4,
+    "layoutId": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2hwfyxob",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#F6F3EC",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/94fu18jq",
+      "id": "2",
+      "bbox": [
+        64,
+        52,
+        520,
+        26
+      ],
+      "geometry": "rect",
+      "text": "SYSTEM FLOW",
+      "textPreview": "SYSTEM FLOW",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SYSTEM FLOW"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SYSTEM FLOW",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SYSTEM FLOW",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kjm1cfa9",
+      "id": "3",
+      "bbox": [
+        64,
+        92,
+        790,
+        104
+      ],
+      "geometry": "rect",
+      "text": "매일 오전 10시, 두 갈래의 알림 흐름이 돈다",
+      "textPreview": "매일 오전 10시, 두 갈래의 알림 흐름이 돈다",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "fontSize": 46,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "매일 오전 10시, 두 갈래의 알림 흐름이"
+          },
+          {
+            "index": 2,
+            "text": "돈다"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "매일 오전 10시, 두 갈래의 알림 흐름이 돈다",
+          "runs": [
+            {
+              "index": 1,
+              "text": "매일 오전 10시, 두 갈래의 알림 흐름이 돈다",
+              "fontSize": 46,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ra5gbq1o",
+      "id": "4",
+      "bbox": [
+        66,
+        198,
+        710,
+        58
+      ],
+      "geometry": "rect",
+      "text": "공개 채널 알림과 개인 관심 게임 DM은 조회 조건은 다르지만, 저장·카드·그래프 생성 체계를 공유합니다.",
+      "textPreview": "공개 채널 알림과 개인 관심 게임 DM은 조회 조건은 다르지만, 저장·카드·그래프 생성 체계를 공유합니다.",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "fontSize": 19,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "공개 채널 알림과 개인 관심 게임 DM은 조회 조건은 다르지만, 저장·카드·그래프 생성 체계를"
+          },
+          {
+            "index": 2,
+            "text": "공유합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "공개 채널 알림과 개인 관심 게임 DM은 조회 조건은 다르지만, 저장·카드·그래프 생성 체계를 공유합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "공개 채널 알림과 개인 관심 게임 DM은 조회 조건은 다르지만, 저장·카드·그래프 생성 체계를 공유합니다.",
+              "fontSize": 19,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2p8nqxs7",
+      "id": "5",
+      "bbox": [
+        64,
+        348,
+        150,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9gr2p8nq",
+      "id": "6",
+      "bbox": [
+        64,
+        348,
+        7,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gvy90je9",
+      "id": "7",
+      "bbox": [
+        86,
+        364,
+        114,
+        26
+      ],
+      "geometry": "rect",
+      "text": "1. Cron",
+      "textPreview": "1. Cron",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1. Cron"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1. Cron",
+          "runs": [
+            {
+              "index": 1,
+              "text": "1. Cron",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1w7mp0",
+      "id": "8",
+      "bbox": [
+        86,
+        398,
+        114,
+        54
+      ],
+      "geometry": "rect",
+      "text": "node-cron\nAsia/Seoul\n기본 10:00",
+      "textPreview": "node-cron | Asia/Seoul | 기본 10:00",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "node-cron"
+          },
+          {
+            "index": 2,
+            "text": "Asia/Seoul"
+          },
+          {
+            "index": 3,
+            "text": "기본 10:00"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "node-cron",
+          "runs": [
+            {
+              "index": 1,
+              "text": "node-cron",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Asia/Seoul",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Asia/Seoul",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "기본 10:00",
+          "runs": [
+            {
+              "index": 1,
+              "text": "기본 10:00",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2t83itgf",
+      "id": "9",
+      "bbox": [
+        220,
+        410,
+        46,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sneloj2t",
+      "id": "10",
+      "bbox": [
+        272,
+        278,
+        210,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l87ed8ba",
+      "id": "11",
+      "bbox": [
+        272,
+        278,
+        7,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#315F9D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ahoza1gv",
+      "id": "12",
+      "bbox": [
+        294,
+        294,
+        174,
+        26
+      ],
+      "geometry": "rect",
+      "text": "2A. AAA 채널",
+      "textPreview": "2A. AAA 채널",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2A. AAA 채널"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2A. AAA 채널",
+          "runs": [
+            {
+              "index": 1,
+              "text": "2A. AAA 채널",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/32lszqtc",
+      "id": "13",
+      "bbox": [
+        294,
+        328,
+        174,
+        54
+      ],
+      "geometry": "rect",
+      "text": "CheapShark 할인\nSteam KR 검증\nAAA 판별",
+      "textPreview": "CheapShark 할인 | Steam KR 검증 | AAA 판별",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CheapShark 할인"
+          },
+          {
+            "index": 2,
+            "text": "Steam KR 검증"
+          },
+          {
+            "index": 3,
+            "text": "AAA 판별"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CheapShark 할인",
+          "runs": [
+            {
+              "index": 1,
+              "text": "CheapShark 할인",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Steam KR 검증",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Steam KR 검증",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "AAA 판별",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AAA 판별",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/szqtcj6t",
+      "id": "14",
+      "bbox": [
+        272,
+        434,
+        210,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lkjm1cfa",
+      "id": "15",
+      "bbox": [
+        272,
+        434,
+        7,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FF7A5F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/at47y1kr",
+      "id": "16",
+      "bbox": [
+        294,
+        450,
+        174,
+        26
+      ],
+      "geometry": "rect",
+      "text": "2B. 개인 관심",
+      "textPreview": "2B. 개인 관심",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2B. 개인 관심"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2B. 개인 관심",
+          "runs": [
+            {
+              "index": 1,
+              "text": "2B. 개인 관심",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3ex0nuxc",
+      "id": "17",
+      "bbox": [
+        294,
+        484,
+        174,
+        54
+      ],
+      "geometry": "rect",
+      "text": "watchlist 조회\n게임별 현재 할인\n중복 DM 제한",
+      "textPreview": "watchlist 조회 | 게임별 현재 할인 | 중복 DM 제한",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "watchlist 조회"
+          },
+          {
+            "index": 2,
+            "text": "게임별 현재 할인"
+          },
+          {
+            "index": 3,
+            "text": "중복 DM 제한"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "watchlist 조회",
+          "runs": [
+            {
+              "index": 1,
+              "text": "watchlist 조회",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "게임별 현재 할인",
+          "runs": [
+            {
+              "index": 1,
+              "text": "게임별 현재 할인",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "중복 DM 제한",
+          "runs": [
+            {
+              "index": 1,
+              "text": "중복 DM 제한",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w3m94fu1",
+      "id": "18",
+      "bbox": [
+        488,
+        340,
+        56,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/loj2t83i",
+      "id": "19",
+      "bbox": [
+        488,
+        496,
+        56,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p8nqxs72",
+      "id": "20",
+      "bbox": [
+        560,
+        358,
+        190,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0nuxc3yl",
+      "id": "21",
+      "bbox": [
+        560,
+        358,
+        7,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#F1C453",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/72x4nap4",
+      "id": "22",
+      "bbox": [
+        582,
+        374,
+        154,
+        26
+      ],
+      "geometry": "rect",
+      "text": "3. DB 기록",
+      "textPreview": "3. DB 기록",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3. DB 기록"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3. DB 기록",
+          "runs": [
+            {
+              "index": 1,
+              "text": "3. DB 기록",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ih4byhgn",
+      "id": "23",
+      "bbox": [
+        582,
+        408,
+        154,
+        54
+      ],
+      "geometry": "rect",
+      "text": "deal_history\nwatch_notifications\naliases",
+      "textPreview": "deal_history | watch_notifications | aliases",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "deal_history"
+          },
+          {
+            "index": 2,
+            "text": "watch_notifications"
+          },
+          {
+            "index": 3,
+            "text": "aliases"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "deal_history",
+          "runs": [
+            {
+              "index": 1,
+              "text": "deal_history",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "watch_notifications",
+          "runs": [
+            {
+              "index": 1,
+              "text": "watch_notifications",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "aliases",
+          "runs": [
+            {
+              "index": 1,
+              "text": "aliases",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pkzupwb2",
+      "id": "24",
+      "bbox": [
+        756,
+        420,
+        54,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0z61032l",
+      "id": "25",
+      "bbox": [
+        826,
+        358,
+        190,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7ed8bat4",
+      "id": "26",
+      "bbox": [
+        826,
+        358,
+        7,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#07675D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/itgfmlkj",
+      "id": "27",
+      "bbox": [
+        848,
+        374,
+        154,
+        26
+      ],
+      "geometry": "rect",
+      "text": "4. 카드 생성",
+      "textPreview": "4. 카드 생성",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4. 카드 생성"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4. 카드 생성",
+          "runs": [
+            {
+              "index": 1,
+              "text": "4. 카드 생성",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pwb2hwfy",
+      "id": "28",
+      "bbox": [
+        848,
+        408,
+        154,
+        54
+      ],
+      "geometry": "rect",
+      "text": "Discord embed\n할인 기록 텍스트\n그래프 PNG",
+      "textPreview": "Discord embed | 할인 기록 텍스트 | 그래프 PNG",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Discord embed"
+          },
+          {
+            "index": 2,
+            "text": "할인 기록 텍스트"
+          },
+          {
+            "index": 3,
+            "text": "그래프 PNG"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Discord embed",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Discord embed",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "할인 기록 텍스트",
+          "runs": [
+            {
+              "index": 1,
+              "text": "할인 기록 텍스트",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "그래프 PNG",
+          "runs": [
+            {
+              "index": 1,
+              "text": "그래프 PNG",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bi9s36h",
+      "id": "29",
+      "bbox": [
+        1022,
+        420,
+        54,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ulwval87",
+      "id": "30",
+      "bbox": [
+        1090,
+        358,
+        126,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j6tovaho",
+      "id": "31",
+      "bbox": [
+        1090,
+        358,
+        7,
+        126
+      ],
+      "geometry": "rect",
+      "fillColor": "#243B3A",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/crmhk3q5",
+      "id": "32",
+      "bbox": [
+        1112,
+        374,
+        90,
+        26
+      ],
+      "geometry": "rect",
+      "text": "5. 전송",
+      "textPreview": "5. 전송",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "5. 전송"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "5. 전송",
+          "runs": [
+            {
+              "index": 1,
+              "text": "5. 전송",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cfa9w3m",
+      "id": "33",
+      "bbox": [
+        1112,
+        408,
+        90,
+        54
+      ],
+      "geometry": "rect",
+      "text": "채널 메시지\n또는 개인 DM",
+      "textPreview": "채널 메시지 | 또는 개인 DM",
+      "resolvedFontSize": 12.51,
+      "resolvedTextStyle": {
+        "fontSize": 12.51,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "채널 메시지"
+          },
+          {
+            "index": 2,
+            "text": "또는 개인 DM"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "채널 메시지",
+          "runs": [
+            {
+              "index": 1,
+              "text": "채널 메시지",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "또는 개인 DM",
+          "runs": [
+            {
+              "index": 1,
+              "text": "또는 개인 DM",
+              "fontSize": 12.51,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/uxc3ylc7",
+      "id": "34",
+      "bbox": [
+        286,
+        256,
+        160,
+        24
+      ],
+      "geometry": "rect",
+      "text": "공개 자동 알림",
+      "textPreview": "공개 자동 알림",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "공개 자동 알림"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "공개 자동 알림",
+          "runs": [
+            {
+              "index": 1,
+              "text": "공개 자동 알림",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#315F9D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ji5snelo",
+      "id": "35",
+      "bbox": [
+        286,
+        560,
+        160,
+        24
+      ],
+      "geometry": "rect",
+      "text": "개인 구독 알림",
+      "textPreview": "개인 구독 알림",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "개인 구독 알림"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "개인 구독 알림",
+          "runs": [
+            {
+              "index": 1,
+              "text": "개인 구독 알림",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#FF7A5F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/c3ylc7u5",
+      "id": "36",
+      "bbox": [
+        64,
+        662,
+        1152,
+        1.5
+      ],
+      "geometry": "rect",
+      "fillColor": "#CFDAD4",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 37,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1kre1w7m",
+      "id": "37",
+      "bbox": [
+        64,
+        675,
+        360,
+        24
+      ],
+      "geometry": "rect",
+      "text": "Sale Pad Discord Bot",
+      "textPreview": "Sale Pad Discord Bot",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sale Pad Discord Bot"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sale Pad Discord Bot",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sale Pad Discord Bot",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 38,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q5o7qpg3",
+      "id": "38",
+      "bbox": [
+        1168,
+        675,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "04",
+      "textPreview": "04",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "04"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04",
+          "runs": [
+            {
+              "index": 1,
+              "text": "04",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

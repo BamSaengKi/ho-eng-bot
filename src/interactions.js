@@ -12,6 +12,7 @@ import { generateDiscountHistoryChartPng } from "./chart.js";
 import { buildDealEmbed, buildHistoryEmbed } from "./discord.js";
 import {
   findCurrentDealFromGame,
+  findCurrentDealFromStoredGame,
   searchCurrentDealCandidates,
 } from "./search.js";
 import {
@@ -19,6 +20,7 @@ import {
   findStoredGamesByTitle,
   getDealHistory,
   getDealHistoryByGameKey,
+  getWatchSubscriptionById,
   listAliases,
   listWatchSubscriptions,
   normalizeAlias,
@@ -28,6 +30,7 @@ import {
   removeWatchSubscription,
   upsertAlias,
 } from "./history.js";
+import { fetchItadDealExpiry } from "./itad.js";
 import { GAME_ALIASES } from "./query-normalizer.js";
 
 const SELECT_TTL_MS = 10 * 60 * 1000;
@@ -171,8 +174,25 @@ function buildShareConfirmButtons(id) {
   );
 }
 
+function buildWatchShareConfirmButtons(id) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`watch_share_confirm:${id}`)
+      .setLabel("공유하기")
+      .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+      .setCustomId(`watch_share_cancel:${id}`)
+      .setLabel("취소")
+      .setStyle(ButtonStyle.Secondary),
+  );
+}
+
 function formatElapsedSeconds(startedAt) {
   return `${((performance.now() - startedAt) / 1000).toFixed(2)}초`;
+}
+
+function getUserDisplayName(interaction) {
+  return interaction.member?.displayName ?? interaction.user.globalName ?? interaction.user.username;
 }
 
 async function renderDealResult(interaction, result, config, startedAt, correction) {
@@ -182,6 +202,7 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
     steamDetails: result.steamDetails,
   });
   const history = getDealHistory(result.deal);
+  const dealExpiry = await fetchItadDealExpiry(result.deal, config);
   const chart = await generateDiscountHistoryChartPng(history, result.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -204,6 +225,7 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
         hasHistoryChart: Boolean(chart),
         historyCount: history.length,
         history,
+        dealExpiry,
         lookupLabel: correction
           ? `${config.region} Steam 현재 할인 정보\n검색어 보정: ${correction.originalQuery} → ${correction.searchQuery}`
           : `${config.region} Steam 현재 할인 정보`,
@@ -360,7 +382,7 @@ export async function handleWatchAddCommand(interaction) {
   await interaction.editReply({
     content: [
       `개인 관심 게임에 등록했습니다: **${saved.title}**`,
-      "매일 자동 조회에서 할인 조건에 맞으면 DM으로 알려드립니다.",
+      "매일 자동 조회에서 할인 조건에 맞으면 공지 채널에 알려드립니다.",
     ].join("\n"),
     components: [],
   });
@@ -388,6 +410,21 @@ export async function handleWatchRemoveCommand(interaction) {
 
 export async function handleInteraction(interaction, config) {
   try {
+    if (interaction.isButton() && interaction.customId.startsWith("watch_share_confirm:")) {
+      await handleWatchShareConfirm(interaction, config);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("watch_share_cancel:")) {
+      await handleWatchShareCancel(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("watch_share:")) {
+      await handleWatchShare(interaction);
+      return;
+    }
+
     if (interaction.isButton() && interaction.customId.startsWith("deal_share_confirm:")) {
       await handleDealShareConfirm(interaction, config);
       return;
@@ -548,6 +585,7 @@ async function handleDealShareConfirm(interaction, config) {
   });
 
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
+  const dealExpiry = await fetchItadDealExpiry(share.deal, config);
   const chart = await generateDiscountHistoryChartPng(share.history, share.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -559,6 +597,7 @@ async function handleDealShareConfirm(interaction, config) {
         hasHistoryChart: Boolean(chart),
         historyCount: share.historyCount,
         history: share.history,
+        dealExpiry,
         lookupLabel: `${config.region} Steam 현재 할인 정보`,
         footerText: "공유된 할인 정보",
       }),
@@ -579,6 +618,121 @@ async function handleDealShareConfirm(interaction, config) {
 
   pendingDealShares.delete(shareId);
   await interaction.editReply("할인 정보를 채널에 공유하고 스레드를 만들었습니다.");
+}
+
+async function handleWatchShare(interaction) {
+  const watchId = interaction.customId.replace("watch_share:", "");
+  const watch = getWatchSubscriptionById(watchId);
+  if (!watch) {
+    await interaction.reply({
+      content: "관심 게임 등록 정보를 찾지 못했습니다. `/watch-add`로 다시 등록해주세요.",
+    });
+    return;
+  }
+
+  if (watch.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 공유 버튼은 관심 게임을 등록한 사용자만 사용할 수 있습니다.",
+    });
+    return;
+  }
+
+  await interaction.reply({
+    content: `"${watch.title}" 할인 정보를 공지 채널에 공개로 공유하고 스레드를 만들까요?`,
+    components: [buildWatchShareConfirmButtons(watchId)],
+  });
+}
+
+async function handleWatchShareCancel(interaction) {
+  const watchId = interaction.customId.replace("watch_share_cancel:", "");
+  const watch = getWatchSubscriptionById(watchId);
+  if (watch && watch.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 공유 확인은 관심 게임을 등록한 사용자만 사용할 수 있습니다.",
+    });
+    return;
+  }
+
+  await interaction.update({
+    content: "공유를 취소했습니다.",
+    components: [],
+  });
+}
+
+async function handleWatchShareConfirm(interaction, config) {
+  const watchId = interaction.customId.replace("watch_share_confirm:", "");
+  const watch = getWatchSubscriptionById(watchId);
+  if (!watch) {
+    await interaction.update({
+      content: "관심 게임 등록 정보를 찾지 못했습니다. `/watch-add`로 다시 등록해주세요.",
+      components: [],
+    });
+    return;
+  }
+
+  if (watch.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 공유 확인은 관심 게임을 등록한 사용자만 사용할 수 있습니다.",
+    });
+    return;
+  }
+
+  await interaction.update({
+    content: "공유 중입니다...",
+    components: [],
+  });
+
+  const result = await findCurrentDealFromStoredGame(watch, config);
+  if (!result || Number(result.deal.savings) < Number(config.minDiscount ?? 1)) {
+    await interaction.editReply("현재 공유할 수 있는 할인 정보를 찾지 못했습니다.");
+    return;
+  }
+
+  const channel = await interaction.client.channels.fetch(config.channelId);
+  if (!channel?.isTextBased()) {
+    await interaction.editReply("공유할 공지 채널을 찾지 못했습니다.");
+    return;
+  }
+
+  const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
+  recordDealLookupHistory({
+    deal: result.deal,
+    steamDetails: result.steamDetails,
+  });
+  const history = getDealHistory(result.deal);
+  const dealExpiry = await fetchItadDealExpiry(result.deal, config);
+  const chart = await generateDiscountHistoryChartPng(history, result.deal.title);
+  const files = chart
+    ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
+    : [];
+  const displayName = getUserDisplayName(interaction);
+  const message = await channel.send({
+    content: `<@${interaction.user.id}>님이 관심 게임 할인 정보를 공유했습니다.`,
+    embeds: [
+      buildDealEmbed(result.deal, result.steamDetails, "개인 관심 게임 공유", usdToKrw, {
+        hasHistoryChart: Boolean(chart),
+        historyCount: history.length,
+        history,
+        dealExpiry,
+        lookupLabel: `${config.region} Steam 개인 관심 게임\n${displayName}님이 관심 게임으로 등록한 할인 정보입니다.`,
+        footerText: "공유된 관심 게임 할인 정보",
+      }),
+    ],
+    files,
+  });
+
+  try {
+    await message.startThread({
+      name: truncate(`${result.deal.title} 할인 정보`, 100),
+      reason: "Watch deal share thread",
+    });
+  } catch (error) {
+    console.warn(`[warn] Failed to create watch share thread: ${error.message}`);
+    await interaction.editReply("할인 정보는 공유했지만 스레드 생성은 실패했습니다.");
+    return;
+  }
+
+  await interaction.editReply("할인 정보를 공지 채널에 공유하고 스레드를 만들었습니다.");
 }
 
 async function handleDealSelection(interaction, config) {
@@ -675,7 +829,7 @@ async function handleWatchSelection(interaction) {
   await interaction.update({
     content: [
       `개인 관심 게임에 등록했습니다: **${saved.title}**`,
-      "매일 자동 조회에서 할인 조건에 맞으면 DM으로 알려드립니다.",
+      "매일 자동 조회에서 할인 조건에 맞으면 공지 채널에 알려드립니다.",
     ].join("\n"),
     embeds: [],
     files: [],
