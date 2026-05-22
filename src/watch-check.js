@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { fetchUsdToKrw } from "./api.js";
+import { fetchSteamAppDetails, fetchSteamAppReviews, fetchUsdToKrw } from "./api.js";
 import { listAllWatchSubscriptions, hasRecentWatchNotification } from "./history.js";
 import { fetchItadCurrentDeals } from "./itad.js";
-import { isStrictRegionEnabled, normalizeRegion } from "./region.js";
+import { getSteamRegionOptions, isStrictRegionEnabled, normalizeRegion } from "./region.js";
 import { findCurrentDealFromStoredGame } from "./search.js";
 
 const config = {
@@ -30,6 +30,32 @@ function isSteamDeal(deal) {
   return String(deal.storeID) === "1" || String(deal.storeName ?? "").toLowerCase() === "steam";
 }
 
+async function enrichCandidate(candidate, watch) {
+  const steamAppId = candidate.deal.steamAppID ?? watch.steamAppId;
+  if (!steamAppId) return candidate;
+
+  const [steamDetails, review] = await Promise.all([
+    candidate.steamDetails
+      ? Promise.resolve(candidate.steamDetails)
+      : fetchSteamAppDetails(steamAppId, getSteamRegionOptions(config)).catch(() => null),
+    candidate.deal.steamRatingPercent && candidate.deal.steamRatingCount
+      ? Promise.resolve(null)
+      : fetchSteamAppReviews(steamAppId).catch(() => null),
+  ]);
+
+  return {
+    ...candidate,
+    steamDetails,
+    deal: {
+      ...candidate.deal,
+      steamAppID: steamAppId,
+      steamRatingPercent: candidate.deal.steamRatingPercent ?? review?.steamRatingPercent,
+      steamRatingCount: candidate.deal.steamRatingCount ?? review?.steamRatingCount,
+      thumb: candidate.deal.thumb ?? steamDetails?.header_image,
+    },
+  };
+}
+
 async function collectCandidates(watch) {
   const candidates = [];
   const result = await findCurrentDealFromStoredGame(watch, config);
@@ -45,7 +71,7 @@ async function collectCandidates(watch) {
     });
   }
 
-  return candidates;
+  return Promise.all(candidates.map((candidate) => enrichCandidate(candidate, watch)));
 }
 
 function formatPrice(deal, usdToKrw) {
@@ -103,6 +129,7 @@ for (const watch of watches) {
         `discount=${formatPercent(discount)}`,
         `price=${price}`,
         `store=${result.deal.storeName ?? result.deal.storeID}`,
+        `review=${result.deal.steamRatingPercent ?? "none"}%/${result.deal.steamRatingCount ?? 0}`,
         `regionVerified=${Boolean(result.deal.regionVerified)}`,
       ].join(" ");
 

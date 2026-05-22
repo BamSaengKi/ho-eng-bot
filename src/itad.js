@@ -140,16 +140,11 @@ async function resolveItadShopIds(apiKey, config = {}) {
   const matched = [];
   for (const shop of shops ?? []) {
     const title = normalizeText(shop.title);
-    if (targetSet.has(title)) {
+    const compactTitle = title.replace(/\s+/g, "");
+    const exactMatch = targetSet.has(title) ||
+      [...targetSet].some((target) => target.replace(/\s+/g, "") === compactTitle);
+    if (exactMatch) {
       matched.push(Number(shop.id));
-      continue;
-    }
-
-    for (const target of targetSet) {
-      if (title.includes(target) || target.includes(title)) {
-        matched.push(Number(shop.id));
-        break;
-      }
     }
   }
 

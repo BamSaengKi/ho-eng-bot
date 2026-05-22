@@ -1,5 +1,6 @@
 const CHEAPSHARK_API = "https://www.cheapshark.com/api/1.0";
 const STEAM_APPDETAILS_API = "https://store.steampowered.com/api/appdetails";
+const STEAM_APPREVIEWS_API = "https://store.steampowered.com/appreviews";
 const FX_API = "https://open.er-api.com/v6/latest/USD";
 
 export async function getJson(url) {
@@ -51,6 +52,28 @@ export async function fetchSteamAppDetails(appId, options = {}) {
   const payload = data?.[appId];
   if (!payload?.success) return null;
   return payload.data ?? null;
+}
+
+export async function fetchSteamAppReviews(appId) {
+  const url = new URL(`${STEAM_APPREVIEWS_API}/${appId}`);
+  url.searchParams.set("json", "1");
+  url.searchParams.set("filter", "summary");
+  url.searchParams.set("language", "all");
+  url.searchParams.set("purchase_type", "all");
+  url.searchParams.set("num_per_page", "0");
+
+  const data = await getJson(url);
+  const summary = data?.query_summary;
+  const totalReviews = Number(summary?.total_reviews);
+  const totalPositive = Number(summary?.total_positive);
+  if (!Number.isFinite(totalReviews) || totalReviews <= 0 || !Number.isFinite(totalPositive)) {
+    return null;
+  }
+
+  return {
+    steamRatingPercent: String(Math.round((totalPositive / totalReviews) * 100)),
+    steamRatingCount: String(totalReviews),
+  };
 }
 
 export async function fetchUsdToKrw(fallbackRate) {
