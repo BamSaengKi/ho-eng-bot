@@ -101,12 +101,61 @@ function openDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_watch_notifications_recent
       ON watch_notifications (user_id, game_key, store_id, notified_at);
+
+    CREATE TABLE IF NOT EXISTS expiry_notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      scope TEXT NOT NULL,
+      user_id TEXT,
+      game_key TEXT NOT NULL,
+      store_id TEXT NOT NULL,
+      expiry_at TEXT NOT NULL,
+      notified_at TEXT NOT NULL,
+      UNIQUE(scope, user_id, game_key, store_id, expiry_at)
+    );
   `);
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
     db.exec("ALTER TABLE deal_history ADD COLUMN price_currency TEXT NOT NULL DEFAULT 'USD'");
   }
   return db;
+}
+
+export function hasExpiryNotification(scope, deal, expiryAt, userId = null) {
+  const db = openDatabase();
+  try {
+    const row = db.prepare(`
+      SELECT id
+      FROM expiry_notifications
+      WHERE scope = ?
+        AND user_id IS ?
+        AND game_key = ?
+        AND store_id = ?
+        AND expiry_at = ?
+      LIMIT 1
+    `).get(scope, userId, getGameKey(deal), String(deal.storeID), expiryAt);
+    return Boolean(row);
+  } finally {
+    db.close();
+  }
+}
+
+export function recordExpiryNotification(scope, deal, expiryAt, userId = null, notifiedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT OR IGNORE INTO expiry_notifications (
+        scope,
+        user_id,
+        game_key,
+        store_id,
+        expiry_at,
+        notified_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(scope, userId, getGameKey(deal), String(deal.storeID), expiryAt, notifiedAt);
+  } finally {
+    db.close();
+  }
 }
 
 export function getGameKeyFromSearchResult(game) {
@@ -472,7 +521,7 @@ export function recordDealHistories(items, checkedAt = new Date().toISOString(),
       insertHistory.run(
         gameKey,
         String(deal.storeID),
-        REQUESTED_STORES.get(String(deal.storeID)) ?? `Store ${deal.storeID}`,
+        deal.storeName ?? REQUESTED_STORES.get(String(deal.storeID)) ?? `Store ${deal.storeID}`,
         deal.title ?? item.steamDetails?.name ?? "Unknown",
         checkedAt,
         toNumber(deal.salePrice),

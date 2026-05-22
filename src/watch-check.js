@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { fetchUsdToKrw } from "./api.js";
 import { listAllWatchSubscriptions, hasRecentWatchNotification } from "./history.js";
+import { fetchItadCurrentDeals } from "./itad.js";
 import { isStrictRegionEnabled, normalizeRegion } from "./region.js";
 import { findCurrentDealFromStoredGame } from "./search.js";
 
@@ -10,7 +11,42 @@ const config = {
   region: normalizeRegion(process.env.REGION),
   regionStrict: isStrictRegionEnabled(process.env.REGION_STRICT),
   steamLanguage: process.env.STEAM_LANGUAGE || "korean",
+  itadApiKey: process.env.ITAD_API_KEY || "",
+  itadShopIds: process.env.ITAD_SHOP_IDS || "",
+  itadShopNames: process.env.ITAD_SHOPS || "",
 };
+
+function getProbeDeal(watch, result) {
+  return result?.deal ?? {
+    title: watch.title ?? watch.query,
+    steamAppID: watch.steamAppId,
+    gameID: watch.gameId,
+    region: config.region,
+    regionVerified: true,
+  };
+}
+
+function isSteamDeal(deal) {
+  return String(deal.storeID) === "1" || String(deal.storeName ?? "").toLowerCase() === "steam";
+}
+
+async function collectCandidates(watch) {
+  const candidates = [];
+  const result = await findCurrentDealFromStoredGame(watch, config);
+  if (result) candidates.push(result);
+
+  const hasSteamCandidate = candidates.some((candidate) => isSteamDeal(candidate.deal));
+  const itadItems = await fetchItadCurrentDeals(getProbeDeal(watch, result), config);
+  for (const item of itadItems) {
+    if (hasSteamCandidate && isSteamDeal(item.deal)) continue;
+    candidates.push({
+      deal: item.deal,
+      steamDetails: result?.steamDetails ?? null,
+    });
+  }
+
+  return candidates;
+}
 
 function formatPrice(deal, usdToKrw) {
   const currency = deal.priceCurrency || "USD";
@@ -51,35 +87,37 @@ console.log(`[watch-check] ${watches.length} subscription(s), region=${config.re
 
 for (const watch of watches) {
   try {
-    const result = await findCurrentDealFromStoredGame(watch, config);
-    if (!result) {
+    const candidates = await collectCandidates(watch);
+    if (candidates.length === 0) {
       console.log(`[skip:no-current-deal] user=${watch.userId} title="${watch.title}"`);
       continue;
     }
 
-    const discount = Number(result.deal.savings);
-    const price = formatPrice(result.deal, usdToKrw);
-    const duplicate = hasRecentWatchNotification(watch.userId, result.deal);
-    const summary = [
-      `user=${watch.userId}`,
-      `title="${result.deal.title}"`,
-      `discount=${formatPercent(discount)}`,
-      `price=${price}`,
-      `store=${result.deal.storeID}`,
-      `regionVerified=${Boolean(result.deal.regionVerified)}`,
-    ].join(" ");
+    for (const result of candidates) {
+      const discount = Number(result.deal.savings);
+      const price = formatPrice(result.deal, usdToKrw);
+      const duplicate = hasRecentWatchNotification(watch.userId, result.deal);
+      const summary = [
+        `user=${watch.userId}`,
+        `title="${result.deal.title}"`,
+        `discount=${formatPercent(discount)}`,
+        `price=${price}`,
+        `store=${result.deal.storeName ?? result.deal.storeID}`,
+        `regionVerified=${Boolean(result.deal.regionVerified)}`,
+      ].join(" ");
 
-    if (discount < config.minDiscount) {
-      console.log(`[skip:below-min-discount] ${summary}`);
-      continue;
+      if (discount < config.minDiscount) {
+        console.log(`[skip:below-min-discount] ${summary}`);
+        continue;
+      }
+
+      if (duplicate) {
+        console.log(`[skip:recently-notified] ${summary}`);
+        continue;
+      }
+
+      console.log(`[would-send] ${summary}`);
     }
-
-    if (duplicate) {
-      console.log(`[skip:recently-notified] ${summary}`);
-      continue;
-    }
-
-    console.log(`[would-send] ${summary}`);
   } catch (error) {
     console.log(`[error] user=${watch.userId} title="${watch.title}" message="${error.message}"`);
   }
