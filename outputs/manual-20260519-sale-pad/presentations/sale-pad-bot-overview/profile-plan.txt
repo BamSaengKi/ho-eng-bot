@@ -1,0 +1,7 @@
+task mode: create
+primary deck-profile: engineering-platform
+required proof objects: feature map, system pipeline, command matrix, database/history model, AWS operation flow
+source/asset requirements: local repository source code and README only
+brand constraints: no external logos; use text labels and editable shapes
+QA gates: readable Korean text, distinct slide rhythms, no invented metrics, diagrams made from editable primitives
+known missing inputs: none

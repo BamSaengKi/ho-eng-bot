@@ -16,7 +16,7 @@ export const HELP_MESSAGE = [
   "등록된 기본 별칭을 확인합니다.",
   "",
   "/watch-add game:Hades",
-  "개인 관심 게임으로 등록하고 할인 시 DM으로 받습니다.",
+  "개인 관심 게임으로 등록하고 할인 시 채널 알림을 받습니다.",
   "/watch-list, /watch-remove game:Hades",
   "내 관심 게임 목록을 확인하거나 삭제합니다.",
 ].join("\n");

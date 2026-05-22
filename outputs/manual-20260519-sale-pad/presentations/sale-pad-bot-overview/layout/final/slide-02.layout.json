@@ -1,0 +1,993 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/f1qmq1",
+    "id": "f1qmq1",
+    "slide": 2,
+    "layoutId": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "55201d97-3b69-48a0-9101-b589f90f4ec7",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "3652335a-0490-4639-82be-812f10bdbeb3",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/58z25kb6",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#F6F3EC",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yhgn29gr",
+      "id": "2",
+      "bbox": [
+        64,
+        52,
+        520,
+        26
+      ],
+      "geometry": "rect",
+      "text": "WHY IT MATTERS",
+      "textPreview": "WHY IT MATTERS",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "WHY IT MATTERS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "WHY IT MATTERS",
+          "runs": [
+            {
+              "index": 1,
+              "text": "WHY IT MATTERS",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n29gr2p8",
+      "id": "3",
+      "bbox": [
+        64,
+        92,
+        790,
+        104
+      ],
+      "geometry": "rect",
+      "text": "할인 정보는 많지만, 필요한 알림은 적어야 한다",
+      "textPreview": "할인 정보는 많지만, 필요한 알림은 적어야 한다",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "fontSize": 46,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "할인 정보는 많지만, 필요한 알림은 적어야"
+          },
+          {
+            "index": 2,
+            "text": "한다"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "할인 정보는 많지만, 필요한 알림은 적어야 한다",
+          "runs": [
+            {
+              "index": 1,
+              "text": "할인 정보는 많지만, 필요한 알림은 적어야 한다",
+              "fontSize": 46,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gbq1oryt",
+      "id": "4",
+      "bbox": [
+        66,
+        198,
+        710,
+        58
+      ],
+      "geometry": "rect",
+      "text": "지역 제한, 중복 알림, 검색 오타, 할인 이력 부재를 줄이는 쪽에 초점을 맞춘 봇입니다.",
+      "textPreview": "지역 제한, 중복 알림, 검색 오타, 할인 이력 부재를 줄이는 쪽에 초점을 맞춘 봇입니다.",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "fontSize": 19,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "지역 제한, 중복 알림, 검색 오타, 할인 이력 부재를 줄이는 쪽에 초점을 맞춘 봇입니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "지역 제한, 중복 알림, 검색 오타, 할인 이력 부재를 줄이는 쪽에 초점을 맞춘 봇입니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "지역 제한, 중복 알림, 검색 오타, 할인 이력 부재를 줄이는 쪽에 초점을 맞춘 봇입니다.",
+              "fontSize": 19,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5wjudg7a",
+      "id": "5",
+      "bbox": [
+        64,
+        318,
+        250,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y90je9cv",
+      "id": "6",
+      "bbox": [
+        64,
+        318,
+        8,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F8F7F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nuxc3ylc",
+      "id": "7",
+      "bbox": [
+        88,
+        340,
+        206,
+        42
+      ],
+      "geometry": "rect",
+      "text": "KR",
+      "textPreview": "KR",
+      "resolvedFontSize": 34,
+      "resolvedTextStyle": {
+        "fontSize": 34,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "KR"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "KR",
+          "runs": [
+            {
+              "index": 1,
+              "text": "KR",
+              "fontSize": 34,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cbulwval",
+      "id": "8",
+      "bbox": [
+        88,
+        388,
+        206,
+        34
+      ],
+      "geometry": "rect",
+      "text": "Steam 한국 가격 기준으로 검증",
+      "textPreview": "Steam 한국 가격 기준으로 검증",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Steam 한국 가격 기준으로 검증"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Steam 한국 가격 기준으로 검증",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Steam 한국 가격 기준으로 검증",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5sneloj2",
+      "id": "9",
+      "bbox": [
+        340,
+        318,
+        250,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tcj6tova",
+      "id": "10",
+      "bbox": [
+        340,
+        318,
+        8,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#F1C453",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0rqd4vmt",
+      "id": "11",
+      "bbox": [
+        364,
+        340,
+        206,
+        42
+      ],
+      "geometry": "rect",
+      "text": "10%+",
+      "textPreview": "10%+",
+      "resolvedFontSize": 34,
+      "resolvedTextStyle": {
+        "fontSize": 34,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "10%+"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "10%+",
+          "runs": [
+            {
+              "index": 1,
+              "text": "10%+",
+              "fontSize": 34,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b6xkf6dc",
+      "id": "12",
+      "bbox": [
+        364,
+        388,
+        206,
+        34
+      ],
+      "geometry": "rect",
+      "text": "기본 최소 할인율 조건",
+      "textPreview": "기본 최소 할인율 조건",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "기본 최소 할인율 조건"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "기본 최소 할인율 조건",
+          "runs": [
+            {
+              "index": 1,
+              "text": "기본 최소 할인율 조건",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/il0rqd4v",
+      "id": "13",
+      "bbox": [
+        616,
+        318,
+        250,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t47y1kre",
+      "id": "14",
+      "bbox": [
+        616,
+        318,
+        8,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#FF7A5F",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0je9cvix",
+      "id": "15",
+      "bbox": [
+        640,
+        340,
+        206,
+        42
+      ],
+      "geometry": "rect",
+      "text": "1주",
+      "textPreview": "1주",
+      "resolvedFontSize": 34,
+      "resolvedTextStyle": {
+        "fontSize": 34,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1주"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1주",
+          "runs": [
+            {
+              "index": 1,
+              "text": "1주",
+              "fontSize": 34,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/byhgn29g",
+      "id": "16",
+      "bbox": [
+        640,
+        388,
+        206,
+        34
+      ],
+      "geometry": "rect",
+      "text": "동일 할인율 반복 기록 제한",
+      "textPreview": "동일 할인율 반복 기록 제한",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "동일 할인율 반복 기록 제한"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "동일 할인율 반복 기록 제한",
+          "runs": [
+            {
+              "index": 1,
+              "text": "동일 할인율 반복 기록 제한",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/idonyd0z",
+      "id": "17",
+      "bbox": [
+        892,
+        318,
+        250,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DCE7E1",
+      "lineWidth": 1
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p0bi9s36",
+      "id": "18",
+      "bbox": [
+        892,
+        318,
+        8,
+        118
+      ],
+      "geometry": "rect",
+      "fillColor": "#315F9D",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0fepkzup",
+      "id": "19",
+      "bbox": [
+        916,
+        340,
+        206,
+        42
+      ],
+      "geometry": "rect",
+      "text": "DM",
+      "textPreview": "DM",
+      "resolvedFontSize": 34,
+      "resolvedTextStyle": {
+        "fontSize": 34,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DM"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DM",
+          "runs": [
+            {
+              "index": 1,
+              "text": "DM",
+              "fontSize": 34,
+              "typeface": "Aptos",
+              "color": "#12211F",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cbulwval",
+      "id": "20",
+      "bbox": [
+        916,
+        388,
+        206,
+        34
+      ],
+      "geometry": "rect",
+      "text": "개인 관심 게임 알림 확장",
+      "textPreview": "개인 관심 게임 알림 확장",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "개인 관심 게임 알림 확장"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "개인 관심 게임 알림 확장",
+          "runs": [
+            {
+              "index": 1,
+              "text": "개인 관심 게임 알림 확장",
+              "fontSize": 15,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5sneloj2",
+      "id": "21",
+      "bbox": [
+        66,
+        502,
+        110,
+        28
+      ],
+      "geometry": "rect",
+      "text": "의의",
+      "textPreview": "의의",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "fontSize": 17,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "의의"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "의의",
+          "runs": [
+            {
+              "index": 1,
+              "text": "의의",
+              "fontSize": 17,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u54zidon",
+      "id": "22",
+      "bbox": [
+        66,
+        538,
+        990,
+        58
+      ],
+      "geometry": "rect",
+      "text": "단순 가격 크롤러가 아니라, 한국에서 실제 구매 가능한 Steam 가격을 기준으로 사용자가 바로 판단할 수 있는 카드와 과거 할인 맥락을 함께 제공합니다.",
+      "textPreview": "단순 가격 크롤러가 아니라, 한국에서 실제 구매 가능한 Steam 가격을 기준으로 사용자가 바로 판단할 수 있는 카드와 과거 할인 맥락을 함께 제공합니다.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "단순 가격 크롤러가 아니라, 한국에서 실제 구매 가능한 Steam 가격을 기준으로 사용자가 바로 판단할 수 있는 카드와"
+          },
+          {
+            "index": 2,
+            "text": "과거 할인 맥락을 함께 제공합니다."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "단순 가격 크롤러가 아니라, 한국에서 실제 구매 가능한 Steam 가격을 기준으로 사용자가 바로 판단할 수 있는 카드와 과거 할인 맥락을 함께 제공합니다.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "단순 가격 크롤러가 아니라, 한국에서 실제 구매 가능한 Steam 가격을 기준으로 사용자가 바로 판단할 수 있는 카드와 과거 할인 맥락을 함께 제공합니다.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#12211F"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nqxs72x4",
+      "id": "23",
+      "bbox": [
+        64,
+        662,
+        1152,
+        1.5
+      ],
+      "geometry": "rect",
+      "fillColor": "#CFDAD4",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/czed8v6p",
+      "id": "24",
+      "bbox": [
+        64,
+        675,
+        360,
+        24
+      ],
+      "geometry": "rect",
+      "text": "Sale Pad Discord Bot",
+      "textPreview": "Sale Pad Discord Bot",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sale Pad Discord Bot"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sale Pad Discord Bot",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sale Pad Discord Bot",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#5F6F6A"
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5kb6xkf6",
+      "id": "25",
+      "bbox": [
+        1168,
+        675,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "02",
+      "textPreview": "02",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "bold": true,
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "02"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02",
+          "runs": [
+            {
+              "index": 1,
+              "text": "02",
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#07675D",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "fillColor": "rgba(0, 0, 0, 0)",
+      "lineColor": "rgba(0, 0, 0, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

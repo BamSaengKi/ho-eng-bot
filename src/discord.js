@@ -110,6 +110,11 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
           : `${deal.region ?? "KR"} 구매 가능 여부 미검증`,
         inline: false,
       },
+      {
+        name: "할인 종료",
+        value: options.dealExpiry?.formatted ?? "확인 불가 · 스토어에서 직접 확인",
+        inline: false,
+      },
     )
     .setFooter({ text: options.footerText ?? "Sale Pad AAA 할인 알림" })
     .setTimestamp(new Date());
@@ -121,7 +126,7 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
   });
 
   if (options.hasHistoryChart) {
-    embed.setImage("attachment://discount-history.png");
+    embed.setImage(`attachment://${options.historyImageName ?? "discount-history.png"}`);
   }
 
   return embed;

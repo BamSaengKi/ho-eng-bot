@@ -10,6 +10,7 @@ import { buildDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
 import { getDealHistory, getGameKey, recordDealHistories } from "./history.js";
 import { handleInteraction } from "./interactions.js";
+import { fetchItadDealExpiry } from "./itad.js";
 import { postWatchDeals } from "./watch.js";
 import {
   applySteamRegionalPrice,
@@ -20,7 +21,7 @@ import {
 } from "./region.js";
 import { readJson, writeJson } from "./storage.js";
 
-const DATA_DIR = resolve("data");
+const DATA_DIR = resolve(process.env.DATA_DIR || "data");
 const SENT_DEALS_PATH = resolve(DATA_DIR, "sent-deals.json");
 const STEAM_CACHE_PATH = resolve(DATA_DIR, "steam-app-cache.json");
 
@@ -39,6 +40,7 @@ const config = {
   region: normalizeRegion(process.env.REGION),
   regionStrict: isStrictRegionEnabled(process.env.REGION_STRICT),
   steamLanguage: process.env.STEAM_LANGUAGE || "korean",
+  itadApiKey: process.env.ITAD_API_KEY || "",
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -213,6 +215,7 @@ async function postDailyDeals(client) {
 
   for (const item of deals) {
     const history = getDealHistory(item.deal);
+    const dealExpiry = await fetchItadDealExpiry(item.deal, config);
     const chart = await generateDiscountHistoryChartPng(history, item.deal.title);
     const files = chart
       ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -224,6 +227,7 @@ async function postDailyDeals(client) {
           hasHistoryChart: Boolean(chart),
           historyCount: history.length,
           history,
+          dealExpiry,
           footerText: "오늘의 할인 정보",
         }),
       ],

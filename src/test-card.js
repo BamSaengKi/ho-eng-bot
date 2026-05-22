@@ -49,6 +49,7 @@ client.once(Events.ClientReady, async () => {
             savingsPercent: 33.34,
           },
         ],
+        dealExpiry: null,
         footerText: "오늘의 할인 정보",
       },
     );
