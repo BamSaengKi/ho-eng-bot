@@ -2,10 +2,9 @@ import "dotenv/config";
 import cron from "node-cron";
 import { AttachmentBuilder, Client, Events, GatewayIntentBits } from "discord.js";
 import { resolve } from "node:path";
-import { fetchDeals, fetchSteamAppDetails, fetchUsdToKrw } from "./api.js";
+import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { classifyAaaGame } from "./classifier.js";
-import { REQUESTED_STORES } from "./config.js";
 import { buildDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
 import {
@@ -16,20 +15,23 @@ import {
   recordExpiryNotification,
 } from "./history.js";
 import { handleInteraction } from "./interactions.js";
-import { fetchItadDealExpiry, isItadExpiryToday } from "./itad.js";
+import {
+  applyItadInfoToDeal,
+  fetchItadDealExpiry,
+  fetchItadDealFeed,
+  fetchItadGameInfo,
+  isItadExpiryToday,
+  itadInfoToSteamDetails,
+} from "./itad.js";
 import { postWatchDeals } from "./watch.js";
 import {
-  applySteamRegionalPrice,
-  getSteamRegionOptions,
   isStrictRegionEnabled,
   normalizeRegion,
-  shouldSkipStoreForRegion,
 } from "./region.js";
 import { readJson, writeJson } from "./storage.js";
 
 const DATA_DIR = resolve(process.env.DATA_DIR || "data");
 const SENT_DEALS_PATH = resolve(DATA_DIR, "sent-deals.json");
-const STEAM_CACHE_PATH = resolve(DATA_DIR, "steam-app-cache.json");
 
 const config = {
   token: process.env.DISCORD_TOKEN,
@@ -49,6 +51,7 @@ const config = {
   itadApiKey: process.env.ITAD_API_KEY || "",
   itadShopIds: process.env.ITAD_SHOP_IDS || "",
   itadShopNames: process.env.ITAD_SHOPS || "",
+  itadDailyScanLimit: Number(process.env.ITAD_DAILY_SCAN_LIMIT || 2500),
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -91,7 +94,7 @@ function printDryRunDeals(deals, usdToKrw, storeSummaries) {
 
   console.log(`[info] Matched ${deals.length} AAA discounts. USD/KRW=${usdToKrw}`);
   for (const [index, item] of deals.entries()) {
-    const storeName = REQUESTED_STORES.get(String(item.deal.storeID)) ?? `Store ${item.deal.storeID}`;
+    const storeName = item.deal.storeName ?? `Store ${item.deal.storeID}`;
     console.log(
       [
         `${index + 1}. ${item.deal.title}`,
@@ -104,78 +107,72 @@ function printDryRunDeals(deals, usdToKrw, storeSummaries) {
   }
 }
 
-async function getSteamDetailsWithCache(appId, cache) {
-  if (!appId) return null;
-  const cacheKey = `${appId}:${config.region}:${config.steamLanguage}`;
-  if (cache[cacheKey]) return cache[cacheKey];
+async function enrichItadFeedItems(items) {
+  const enriched = [];
+  const concurrency = 5;
 
-  const details = await fetchSteamAppDetails(appId, getSteamRegionOptions(config));
-  cache[cacheKey] = {
-    savedAt: new Date().toISOString(),
-    ...(details ?? {}),
-  };
-  return cache[cacheKey];
+  for (let index = 0; index < items.length; index += concurrency) {
+    const chunk = items.slice(index, index + concurrency);
+    const results = await Promise.all(chunk.map(async (item) => {
+      const info = await fetchItadGameInfo(item.deal, config).catch(() => null);
+      if (!info) return item;
+
+      return {
+        ...item,
+        deal: applyItadInfoToDeal(item.deal, info),
+        steamDetails: itadInfoToSteamDetails(info),
+        itadInfo: info,
+      };
+    }));
+    enriched.push(...results);
+  }
+
+  return enriched;
+}
+
+function uniqueDealItems(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = `${item.deal.itadId ?? item.deal.gameID}:${item.deal.storeID}:${item.deal.salePrice}:${item.deal.savings}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 async function collectAaaDeals() {
   const sentDeals = await readJson(SENT_DEALS_PATH, { dealIds: [] });
   const sentDealIds = new Set(sentDeals.dealIds ?? []);
-  const steamCache = await readJson(STEAM_CACHE_PATH, {});
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
   const historyItems = [];
-  const storeSummaries = [];
+  const storeSummaries = [{
+    storeId: "itad",
+    storeName: "ITAD selected stores",
+    discountedCount: 0,
+    aaaCount: 0,
+    error: null,
+  }];
 
-  for (const storeId of config.storeIds) {
-    if (!REQUESTED_STORES.has(storeId)) continue;
-    const storeName = REQUESTED_STORES.get(storeId) ?? storeId;
-    const summary = {
-      storeId,
-      storeName,
-      discountedCount: 0,
-      aaaCount: 0,
-      error: null,
-    };
-
-    try {
-      if (shouldSkipStoreForRegion(storeId, config)) {
-        summary.error = `${config.region} strict mode skips non-Steam stores`;
-        continue;
-      }
-
-      const deals = await fetchDeals({ storeId, minDiscount: config.minDiscount });
-      summary.discountedCount = deals.length;
-      for (const deal of deals) {
-        const steamDetails = await getSteamDetailsWithCache(deal.steamAppID, steamCache);
-        const regionalDeal = applySteamRegionalPrice(deal, steamDetails, config.region);
-        if (config.regionStrict && !regionalDeal) continue;
-
-        const checkedDeal = regionalDeal ?? {
-          ...deal,
-          region: config.region,
-          regionVerified: false,
-        };
-        if (Number(checkedDeal.savings) < config.minDiscount) continue;
-
-        const classification = classifyAaaGame(deal, steamDetails);
-        if (!classification.isAaa) continue;
-        summary.aaaCount += 1;
-
-        const item = {
-          deal: checkedDeal,
-          steamDetails,
-          aaaReason: classification.reason,
-        };
-        historyItems.push(item);
-      }
-    } catch (error) {
-      summary.error = error.message;
-      console.warn(`[warn] ${storeName} deals failed: ${error.message}`);
-    } finally {
-      storeSummaries.push(summary);
+  try {
+    const rawItems = await fetchItadDealFeed(config);
+    storeSummaries[0].discountedCount = rawItems.length;
+    const titleCandidates = rawItems.filter((item) => classifyAaaGame(item.deal, item.steamDetails).isAaa);
+    const topDiscountCandidates = rawItems.slice(0, 100);
+    const items = await enrichItadFeedItems(uniqueDealItems([...titleCandidates, ...topDiscountCandidates]));
+    for (const item of items) {
+      const classification = classifyAaaGame(item.deal, item.steamDetails);
+      if (!classification.isAaa) continue;
+      storeSummaries[0].aaaCount += 1;
+      historyItems.push({
+        ...item,
+        aaaReason: classification.reason,
+      });
     }
+  } catch (error) {
+    storeSummaries[0].error = error.message;
+    console.warn(`[warn] ITAD deals failed: ${error.message}`);
   }
 
-  await writeJson(STEAM_CACHE_PATH, steamCache);
   let savedHistory = new Map();
   if (!config.dryRun) {
     savedHistory = recordDealHistories(historyItems);
@@ -227,7 +224,7 @@ async function postDailyDeals(client) {
 
   for (const item of deals) {
     const history = getDealHistory(item.deal);
-    const dealExpiry = await fetchItadDealExpiry(item.deal, config);
+    const dealExpiry = item.dealExpiry ?? await fetchItadDealExpiry(item.deal, config);
     const chart = await generateDiscountHistoryChartPng(history, item.deal.title);
     const files = chart
       ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -260,7 +257,7 @@ async function postDailyDeals(client) {
 async function postDailyExpiryReminders(channel, deals, usdToKrw) {
   const reminderItems = [];
   for (const item of deals) {
-    const dealExpiry = await fetchItadDealExpiry(item.deal, config);
+    const dealExpiry = item.dealExpiry ?? await fetchItadDealExpiry(item.deal, config);
     if (!isItadExpiryToday(dealExpiry) || hasExpiryNotification("daily", item.deal, dealExpiry.raw)) {
       continue;
     }

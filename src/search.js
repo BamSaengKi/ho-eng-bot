@@ -1,12 +1,20 @@
-import { fetchDealDetails, fetchSteamAppDetails, searchCheapSharkGames } from "./api.js";
+import {
+  applyItadInfoToDeal,
+  fetchItadCurrentDeals,
+  fetchItadGameInfo,
+  itadInfoToSteamDetails,
+  searchItadGames,
+} from "./itad.js";
 import { resolveGameQuery } from "./query-normalizer.js";
-import { applySteamRegionalPrice, getSteamRegionOptions } from "./region.js";
 
 const ADD_ON_HINTS = [
   "deluxe kit",
   "kit",
   "sunbreak",
   "iceborne",
+  "eternal orbs",
+  "premium arcade",
+  "skins bundle",
   "soundtrack",
   "costume",
   "character pass",
@@ -17,7 +25,13 @@ const ADD_ON_HINTS = [
 ];
 
 function normalize(value) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/®|™/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function isLikelyAddOn(game) {
@@ -34,28 +48,43 @@ function scoreGame(query, game) {
   return 3;
 }
 
-function toDeal(gameInfo, dealId) {
-  const salePrice = Number(gameInfo.salePrice);
-  const normalPrice = Number(gameInfo.retailPrice);
-  const savings = normalPrice > 0 ? ((normalPrice - salePrice) / normalPrice) * 100 : 0;
+function pickBestDeal(items) {
+  return [...items].sort((a, b) => {
+    const discountDiff = Number(b.deal.savings) - Number(a.deal.savings);
+    if (discountDiff !== 0) return discountDiff;
+    return Number(a.deal.salePrice) - Number(b.deal.salePrice);
+  })[0] ?? null;
+}
+
+async function buildDealResult(game, config = {}) {
+  const info = await fetchItadGameInfo(game, config);
+  const baseDeal = {
+    title: info?.title ?? game.external,
+    gameID: info?.id ?? game.itadId ?? game.gameID,
+    itadId: info?.id ?? game.itadId ?? game.gameID,
+    steamAppID: info?.appid ?? game.steamAppID,
+    thumb: info?.assets?.banner145 ?? info?.assets?.boxart ?? game.thumb,
+    region: config.region,
+    regionVerified: true,
+  };
+
+  const currentDeals = await fetchItadCurrentDeals(baseDeal, config);
+  const best = pickBestDeal(currentDeals);
+  if (!best) return null;
 
   return {
-    title: gameInfo.name,
-    dealID: dealId,
-    storeID: gameInfo.storeID,
-    gameID: gameInfo.gameID,
-    steamAppID: gameInfo.steamAppID,
-    salePrice: gameInfo.salePrice,
-    normalPrice: gameInfo.retailPrice,
-    savings: String(savings),
-    steamRatingPercent: gameInfo.steamRatingPercent,
-    steamRatingCount: gameInfo.steamRatingCount,
-    thumb: gameInfo.thumb,
+    deal: applyItadInfoToDeal(best.deal, info),
+    steamDetails: itadInfoToSteamDetails(info),
+    dealExpiry: best.dealExpiry,
+    allDeals: currentDeals.map((item) => ({
+      ...item,
+      deal: applyItadInfoToDeal(item.deal, info),
+    })),
   };
 }
 
 export async function findBestCurrentDeal(query, config = {}) {
-  const search = await searchCurrentDealCandidates(query);
+  const search = await searchCurrentDealCandidates(query, 10, config);
   for (const candidate of search.candidates) {
     const result = await findCurrentDealFromGame(candidate, config);
     if (result) {
@@ -72,23 +101,36 @@ export async function findBestCurrentDeal(query, config = {}) {
 }
 
 export async function findCurrentDealFromStoredGame(watch, config = {}) {
-  const search = await searchCurrentDealCandidates(watch.title ?? watch.query);
-  const candidate = search.candidates.find((game) =>
+  const candidate = {
+    external: watch.title ?? watch.query,
+    title: watch.title ?? watch.query,
+    gameID: watch.gameId,
+    itadId: String(watch.gameId ?? "").includes("-") ? watch.gameId : null,
+    steamAppID: watch.steamAppId,
+    source: "itad",
+  };
+
+  if (candidate.itadId) {
+    const result = await findCurrentDealFromGame(candidate, config);
+    if (result) return result;
+  }
+
+  const search = await searchCurrentDealCandidates(watch.title ?? watch.query, 10, config);
+  const match = search.candidates.find((game) =>
     (watch.steamAppId && String(game.steamAppID) === String(watch.steamAppId)) ||
     (watch.gameId && String(game.gameID) === String(watch.gameId)) ||
     normalize(game.external) === normalize(watch.title),
   ) ?? search.candidates[0];
 
-  if (!candidate) return null;
-  return findCurrentDealFromGame(candidate, config);
+  return match ? findCurrentDealFromGame(match, config) : null;
 }
 
-export async function searchCurrentDealCandidates(query, limit = 10) {
+export async function searchCurrentDealCandidates(query, limit = 10, config = {}) {
   const resolved = resolveGameQuery(query);
   const queries = [...new Set([resolved.query, query])];
 
   for (const searchQuery of queries) {
-    const candidates = await searchCandidatesForQuery(searchQuery, limit);
+    const candidates = await searchCandidatesForQuery(searchQuery, limit, config);
     if (candidates.length > 0) {
       return {
         originalQuery: query,
@@ -107,40 +149,17 @@ export async function searchCurrentDealCandidates(query, limit = 10) {
   };
 }
 
-async function searchCandidatesForQuery(query, limit) {
-  const games = await searchCheapSharkGames(query, limit);
+async function searchCandidatesForQuery(query, limit, config) {
+  const games = await searchItadGames(query, config, limit);
   return [...games].sort((a, b) => {
-    const scoreDiff = scoreGame(query, a) - scoreGame(query, b);
-    if (scoreDiff !== 0) return scoreDiff;
     const addOnDiff = Number(isLikelyAddOn(a)) - Number(isLikelyAddOn(b));
     if (addOnDiff !== 0) return addOnDiff;
-    return Number(a.cheapest || Infinity) - Number(b.cheapest || Infinity);
+    const scoreDiff = scoreGame(query, a) - scoreGame(query, b);
+    if (scoreDiff !== 0) return scoreDiff;
+    return a.external.localeCompare(b.external);
   });
 }
 
 export async function findCurrentDealFromGame(game, config = {}) {
-  if (!game?.cheapestDealID) return null;
-
-  const dealId = decodeURIComponent(game.cheapestDealID);
-  const details = await fetchDealDetails(dealId);
-  const gameInfo = details?.gameInfo;
-  if (!gameInfo) return null;
-
-  const deal = toDeal(gameInfo, dealId);
-  const steamDetails = deal.steamAppID
-    ? await fetchSteamAppDetails(deal.steamAppID, getSteamRegionOptions(config))
-    : null;
-  const regionalDeal = applySteamRegionalPrice(deal, steamDetails, config.region);
-
-  if (config.regionStrict && !regionalDeal) return null;
-  if (config.regionStrict && Number(regionalDeal.savings) < Number(config.minDiscount ?? 1)) return null;
-
-  return {
-    deal: regionalDeal ?? {
-      ...deal,
-      region: config.region,
-      regionVerified: false,
-    },
-    steamDetails,
-  };
+  return buildDealResult(game, config);
 }

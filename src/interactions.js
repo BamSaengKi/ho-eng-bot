@@ -134,7 +134,7 @@ function buildSelectMenu(id, candidates, placeholder = "조회할 게임을 선�
       candidates.slice(0, 10).map((game, index) =>
         new StringSelectMenuOptionBuilder()
           .setLabel(truncate(game.external, 100))
-          .setDescription(truncate(`현재 최저가 $${game.cheapest ?? "?"}`, 100))
+          .setDescription(truncate(game.steamAppID ? `Steam app ${game.steamAppID}` : "ITAD 검색 결과", 100))
           .setValue(String(index)),
       ),
     );
@@ -202,7 +202,7 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
     steamDetails: result.steamDetails,
   });
   const history = getDealHistory(result.deal);
-  const dealExpiry = await fetchItadDealExpiry(result.deal, config);
+  const dealExpiry = result.dealExpiry ?? await fetchItadDealExpiry(result.deal, config);
   const chart = await generateDiscountHistoryChartPng(history, result.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -212,6 +212,7 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
     userId: interaction.user.id,
     deal: result.deal,
     steamDetails: result.steamDetails,
+    dealExpiry,
     history,
     hasHistoryChart: Boolean(chart),
     historyCount: history.length,
@@ -227,8 +228,8 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
         history,
         dealExpiry,
         lookupLabel: correction
-          ? `${config.region} Steam 현재 할인 정보\n검색어 보정: ${correction.originalQuery} → ${correction.searchQuery}`
-          : `${config.region} Steam 현재 할인 정보`,
+          ? `${config.region} ITAD 현재 할인 정보\n검색어 보정: ${correction.originalQuery} → ${correction.searchQuery}`
+          : `${config.region} ITAD 현재 할인 정보`,
         footerText: `검색 소요 시간: ${formatElapsedSeconds(startedAt)}`,
       }),
     ],
@@ -242,7 +243,7 @@ export async function handleDealCommand(interaction, config) {
   const startedAt = performance.now();
   await interaction.deferReply({ ephemeral: true });
 
-  const search = await searchCurrentDealCandidates(query);
+  const search = await searchCurrentDealCandidates(query, 10, config);
   if (search.candidates.length === 0) {
     await replyNoResult(interaction, buildMissingGameMessage(query));
     return;
@@ -357,7 +358,7 @@ export async function handleWatchAddCommand(interaction) {
   const query = getGameOption(interaction);
   await interaction.deferReply({ ephemeral: true });
 
-  const search = await searchCurrentDealCandidates(query);
+  const search = await searchCurrentDealCandidates(query, 10, config);
   if (search.candidates.length === 0) {
     await replyNoResult(interaction, buildMissingGameMessage(query));
     return;
@@ -585,7 +586,7 @@ async function handleDealShareConfirm(interaction, config) {
   });
 
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
-  const dealExpiry = await fetchItadDealExpiry(share.deal, config);
+  const dealExpiry = share.dealExpiry ?? await fetchItadDealExpiry(share.deal, config);
   const chart = await generateDiscountHistoryChartPng(share.history, share.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -598,7 +599,7 @@ async function handleDealShareConfirm(interaction, config) {
         historyCount: share.historyCount,
         history: share.history,
         dealExpiry,
-        lookupLabel: `${config.region} Steam 현재 할인 정보`,
+        lookupLabel: `${config.region} ITAD 현재 할인 정보`,
         footerText: "공유된 할인 정보",
       }),
     ],
@@ -700,7 +701,7 @@ async function handleWatchShareConfirm(interaction, config) {
     steamDetails: result.steamDetails,
   });
   const history = getDealHistory(result.deal);
-  const dealExpiry = await fetchItadDealExpiry(result.deal, config);
+  const dealExpiry = result.dealExpiry ?? await fetchItadDealExpiry(result.deal, config);
   const chart = await generateDiscountHistoryChartPng(history, result.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -714,7 +715,7 @@ async function handleWatchShareConfirm(interaction, config) {
         historyCount: history.length,
         history,
         dealExpiry,
-        lookupLabel: `${config.region} Steam 개인 관심 게임\n${displayName}님이 관심 게임으로 등록한 할인 정보입니다.`,
+        lookupLabel: `${config.region} 개인 관심 게임\n${displayName}님이 관심 게임으로 등록한 할인 정보입니다.`,
         footerText: "공유된 관심 게임 할인 정보",
       }),
     ],
