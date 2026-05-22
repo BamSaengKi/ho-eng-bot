@@ -33,6 +33,8 @@ function nearlyEqual(left, right) {
 
 export function getGameKey(deal) {
   if (deal.steamAppID) return `steam:${deal.steamAppID}`;
+  if (deal.itadId) return `itad:${deal.itadId}`;
+  if (deal.gameID && String(deal.gameID).includes("-")) return `itad:${deal.gameID}`;
   if (deal.gameID) return `cheapshark:${deal.gameID}`;
   return `title:${deal.storeID}:${normalizeTitle(deal.title)}`;
 }
@@ -160,6 +162,8 @@ export function recordExpiryNotification(scope, deal, expiryAt, userId = null, n
 
 export function getGameKeyFromSearchResult(game) {
   if (game.steamAppID) return `steam:${game.steamAppID}`;
+  if (game.itadId) return `itad:${game.itadId}`;
+  if (game.gameID && String(game.gameID).includes("-")) return `itad:${game.gameID}`;
   if (game.gameID) return `cheapshark:${game.gameID}`;
   return `title:${normalizeTitle(game.external)}`;
 }

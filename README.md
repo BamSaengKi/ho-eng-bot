@@ -128,22 +128,20 @@ Discord 채팅방에서 사용:
 
 ## 동작
 
-- CheapShark에서 Steam, Epic Games Store, Humble Store, Uplay 할인을 조회합니다.
+- IsThereAnyDeal에서 `ITAD_SHOPS`에 설정된 스토어의 KR 할인을 조회합니다.
 - 할인율이 `MIN_DISCOUNT` 이상인 딜만 확인합니다.
-- Steam `appdetails`에서 개발사/퍼블리셔를 확인합니다.
-- 기본값은 `REGION=KR`, `REGION_STRICT=true`라서 Steam 한국 가격이 검증되는 딜만 알림 대상으로 삼습니다.
-- `REGION_STRICT=false`로 바꾸면 외부 스토어도 표시할 수 있지만, 카드에 한국 구매 가능 여부 미검증으로 표시됩니다.
+- ITAD 게임 정보에서 Steam appid, 개발사/퍼블리셔, Steam 리뷰를 확인합니다.
+- 기본값은 `REGION=KR`라서 ITAD의 한국 지역 가격을 기준으로 알림 대상을 삼습니다.
 - AAA 개발사/퍼블리셔 목록에 걸리는 게임만 Discord embed 카드로 전송합니다.
 - 시즌 패스, DLC, 사운드트랙 같은 추가 콘텐츠는 제목 키워드로 제외합니다.
 - 이미 보낸 `dealID`는 `data/sent-deals.json`에 저장해 중복 전송을 막습니다.
-- Steam 앱 상세 정보는 `data/steam-app-cache.json`에 캐시합니다.
 - AAA 조건에 맞는 할인 기록은 `data/deals.sqlite`에 저장합니다.
 - 다음 알림부터 같은 게임/스토어의 과거 할인 기록이 2개 이상이면 Discord embed에 할인 히스토리 그래프를 PNG로 첨부합니다.
 - 같은 게임/스토어에서 할인율과 가격이 직전 기록과 같으면 히스토리에 중복 저장하지 않습니다.
 - 이미 보낸 `dealID`라도 가격이나 할인율이 바뀌어 새 히스토리가 저장되면 다시 알림 후보가 됩니다.
 - `npm run dry-run`은 Discord 토큰 없이 후보 딜과 AAA 판별 사유를 콘솔에 출력합니다.
 - `npm run dry-run:all`은 이미 보낸 딜까지 포함해서 개발용으로 전체 후보를 확인합니다.
-- `/deal`은 CheapShark에서 특정 게임의 현재 최저 할인 정보를 조회해 카드로 보여줍니다.
+- `/deal`은 ITAD에서 특정 게임의 현재 최저 할인 정보를 조회해 카드로 보여줍니다.
 - `/deal` 결과는 본인만 볼 수 있으며, 카드의 공유 버튼을 누르면 채널에 공개 메시지와 스레드를 만듭니다.
 - `/history`는 `data/deals.sqlite`에 저장된 특정 게임의 할인 기록과 그래프를 보여줍니다.
 - `/alias-add`는 채팅방 사용자가 누구나 사용할 수 있고, `/alias-remove`는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.
@@ -153,8 +151,7 @@ Discord 채팅방에서 사용:
 - 관심 게임 알림도 `data/deals.sqlite`의 할인 기록을 사용하며 기록이 2개 이상이면 그래프를 첨부합니다.
 - 관심 게임 알림은 하루 단위 뉴스레터 메시지로 묶고, 유저를 멘션한 뒤 스레드를 만듭니다.
 - 같은 사용자/게임/스토어에서 같은 할인율과 가격은 1주일에 1번만 채널 알림으로 보냅니다.
-- `ITAD_API_KEY`가 있으면 IsThereAnyDeal에서 할인 종료일을 보조 조회해 카드에 표시합니다. 실패하거나 키가 없으면 `확인 불가`로 표시합니다.
-- 관심 게임 알림은 `ITAD_SHOPS`에 설정된 Steam, Epic Game Store, Ubisoft Store, Blizzard, Humble Store의 KR 할인도 함께 확인합니다.
+- `ITAD_API_KEY`가 있으면 할인 종료일을 카드에 표시합니다. 실패하거나 키가 없으면 `확인 불가`로 표시합니다.
 - 채팅에 `/사용법`을 보내면 봇 사용법을 답장합니다. Discord 개발자 포털에서 Message Content Intent가 켜져 있어야 합니다.
 
 ## AAA 판별

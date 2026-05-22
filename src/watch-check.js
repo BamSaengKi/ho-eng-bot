@@ -62,7 +62,7 @@ async function collectCandidates(watch) {
   if (result) candidates.push(result);
 
   const hasSteamCandidate = candidates.some((candidate) => isSteamDeal(candidate.deal));
-  const itadItems = await fetchItadCurrentDeals(getProbeDeal(watch, result), config);
+  const itadItems = result?.allDeals ?? await fetchItadCurrentDeals(getProbeDeal(watch, result), config);
   for (const item of itadItems) {
     if (hasSteamCandidate && isSteamDeal(item.deal)) continue;
     candidates.push({

@@ -82,7 +82,7 @@ async function collectWatchDealCandidates(watch, config) {
   }
 
   const probeDeal = createWatchProbeDeal(watch, result);
-  const itadItems = await fetchItadCurrentDeals(probeDeal, config);
+  const itadItems = result?.allDeals ?? await fetchItadCurrentDeals(probeDeal, config);
   const hasSteamCandidate = candidates.some((candidate) => isSteamDeal(candidate.deal));
 
   for (const item of itadItems) {
