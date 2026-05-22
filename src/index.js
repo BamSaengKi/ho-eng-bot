@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { classifyAaaGame } from "./classifier.js";
+import { SPECIAL_EDITION_KEYWORDS } from "./config.js";
 import { buildDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
 import {
@@ -140,6 +141,48 @@ function uniqueDealItems(items) {
   });
 }
 
+function normalizeTitleText(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/®|™/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isSpecialEditionTitle(title) {
+  const normalized = normalizeTitleText(title);
+  return SPECIAL_EDITION_KEYWORDS.some((keyword) => normalized.includes(normalizeTitleText(keyword)));
+}
+
+function getBaseTitle(title) {
+  let normalized = normalizeTitleText(title);
+  for (const keyword of SPECIAL_EDITION_KEYWORDS) {
+    normalized = normalized.replace(new RegExp(`\\b${normalizeTitleText(keyword).replaceAll(" ", "\\s+")}\\b`, "gi"), " ");
+  }
+  return normalized
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function attachRelatedEditions(baseItems, editionItems) {
+  const editionsByBase = new Map();
+  for (const item of editionItems) {
+    const baseTitle = getBaseTitle(item.deal.title);
+    if (!baseTitle) continue;
+    const editions = editionsByBase.get(baseTitle) ?? [];
+    editions.push(item.deal);
+    editionsByBase.set(baseTitle, editions);
+  }
+
+  return baseItems.map((item) => ({
+    ...item,
+    relatedEditions: (editionsByBase.get(getBaseTitle(item.deal.title)) ?? [])
+      .sort((a, b) => Number(b.savings) - Number(a.savings))
+      .slice(0, 5),
+  }));
+}
+
 async function collectAaaDeals() {
   const sentDeals = await readJson(SENT_DEALS_PATH, { dealIds: [] });
   const sentDealIds = new Set(sentDeals.dealIds ?? []);
@@ -156,9 +199,15 @@ async function collectAaaDeals() {
   try {
     const rawItems = await fetchItadDealFeed(config);
     storeSummaries[0].discountedCount = rawItems.length;
-    const titleCandidates = rawItems.filter((item) => classifyAaaGame(item.deal, item.steamDetails).isAaa);
-    const topDiscountCandidates = rawItems.slice(0, 100);
-    const items = await enrichItadFeedItems(uniqueDealItems([...titleCandidates, ...topDiscountCandidates]));
+    const baseRawItems = rawItems.filter((item) => !isSpecialEditionTitle(item.deal.title));
+    const editionRawItems = rawItems.filter((item) => isSpecialEditionTitle(item.deal.title));
+    const titleCandidates = baseRawItems.filter((item) => classifyAaaGame(item.deal, item.steamDetails).isAaa);
+    const topDiscountCandidates = baseRawItems.slice(0, 100);
+    const editionItems = await enrichItadFeedItems(editionRawItems);
+    const items = attachRelatedEditions(
+      await enrichItadFeedItems(uniqueDealItems([...titleCandidates, ...topDiscountCandidates])),
+      editionItems,
+    );
     for (const item of items) {
       const classification = classifyAaaGame(item.deal, item.steamDetails);
       if (!classification.isAaa) continue;
@@ -237,6 +286,7 @@ async function postDailyDeals(client) {
           historyCount: history.length,
           history,
           dealExpiry,
+          relatedEditions: item.relatedEditions,
           footerText: "오늘의 할인 정보",
         }),
       ],

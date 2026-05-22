@@ -16,16 +16,6 @@ import { fetchItadCurrentDeals, fetchItadDealExpiry, isItadExpiryToday } from ".
 import { getSteamRegionOptions } from "./region.js";
 import { findCurrentDealFromStoredGame } from "./search.js";
 
-const MAX_EMBEDS_PER_MESSAGE = 10;
-
-function chunkItems(items, size) {
-  const chunks = [];
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size));
-  }
-  return chunks;
-}
-
 function uniqueValues(values) {
   return [...new Set(values.filter(Boolean))];
 }
@@ -112,15 +102,19 @@ async function collectWatchDealCandidates(watch, config) {
   return Promise.all(uniqueCandidates.map((candidate) => enrichWithSteamInfo(candidate, watch, config)));
 }
 
-function formatNewsletterContent(groups, totalCount) {
-  const mentions = uniqueValues(groups.flatMap((group) => group.watchers.map((watcher) => `<@${watcher.userId}>`)));
-  const expiryCount = groups.filter((group) => group.expiryReminder).length;
+function formatDealContent(group) {
+  const mentions = uniqueValues(group.watchers.map((watcher) => `<@${watcher.userId}>`));
   return [
-    "**관심 게임 할인 뉴스레터**",
-    `watch-list에 등록된 게임 중 오늘 할인 중인 항목 ${totalCount}개를 찾았습니다.`,
-    expiryCount > 0 ? `오늘 할인 종료 예정 항목 ${expiryCount}개가 포함되어 있습니다.` : "",
+    group.expiryReminder ? "**관심 게임 할인 종료 알림**" : "**관심 게임 할인 알림**",
+    `watch-list에 등록된 게임입니다: **${group.deal.title}**`,
+    group.expiryReminder ? "오늘 할인 종료 예정입니다." : "",
     mentions.length > 0 ? `대상: ${mentions.join(" ")}` : "",
   ].filter(Boolean).join("\n");
+}
+
+function formatThreadName(group) {
+  const title = `${group.deal.title} 할인 정보`;
+  return title.length > 100 ? title.slice(0, 100) : title;
 }
 
 export async function postWatchDeals(client, config) {
@@ -203,64 +197,57 @@ export async function postWatchDeals(client, config) {
   }
 
   const groups = [...groupedDeals.values()];
-  for (const groupChunk of chunkItems(groups, MAX_EMBEDS_PER_MESSAGE)) {
-    const embeds = [];
-    const files = [];
-
-    for (const [index, group] of groupChunk.entries()) {
-      const history = getDealHistory(group.deal);
-      const chart = await generateDiscountHistoryChartPng(history, group.deal.title);
-      const historyImageName = `discount-history-${index + 1}.png`;
-      if (chart) {
-        files.push(new AttachmentBuilder(chart, { name: historyImageName }));
-      }
-
-      const watcherNames = uniqueValues(group.watchers.map((watcher) => watcher.displayName)).join(", ");
-      const watcherLabel = group.watchers.length > 1
-        ? `${watcherNames}님들이 관심 게임으로 등록한 할인 정보입니다.`
-        : `${watcherNames}님이 관심 게임으로 등록한 할인 정보입니다.`;
-      embeds.push(buildDealEmbed(group.deal, group.steamDetails, "개인 관심 게임", usdToKrw, {
-        hasHistoryChart: Boolean(chart),
-        historyCount: history.length,
-        history,
-        dealExpiry: group.dealExpiry,
-        expiryReminder: group.expiryReminder,
-        historyImageName,
-        lookupLabel: `${config.region} 개인 관심 게임\n${watcherLabel}`,
-        footerText: group.expiryReminder ? "관심 게임 할인 종료 알림" : "관심 게임 할인 뉴스레터",
-      }));
-    }
+  for (const group of groups) {
+    const history = getDealHistory(group.deal);
+    const chart = await generateDiscountHistoryChartPng(history, group.deal.title);
+    const historyImageName = "discount-history.png";
+    const files = chart
+      ? [new AttachmentBuilder(chart, { name: historyImageName })]
+      : [];
+    const watcherNames = uniqueValues(group.watchers.map((watcher) => watcher.displayName)).join(", ");
+    const watcherLabel = group.watchers.length > 1
+      ? `${watcherNames}님들이 관심 게임으로 등록한 할인 정보입니다.`
+      : `${watcherNames}님이 관심 게임으로 등록한 할인 정보입니다.`;
 
     try {
       const message = await channel.send({
-        content: formatNewsletterContent(groupChunk, groups.length),
-        embeds,
+        content: formatDealContent(group),
+        embeds: [
+          buildDealEmbed(group.deal, group.steamDetails, "개인 관심 게임", usdToKrw, {
+            hasHistoryChart: Boolean(chart),
+            historyCount: history.length,
+            history,
+            dealExpiry: group.dealExpiry,
+            expiryReminder: group.expiryReminder,
+            historyImageName,
+            lookupLabel: `${config.region} 개인 관심 게임\n${watcherLabel}`,
+            footerText: group.expiryReminder ? "관심 게임 할인 종료 알림" : "관심 게임 할인 알림",
+          }),
+        ],
         files,
       });
 
       try {
         await message.startThread({
-          name: "관심 게임 할인 뉴스레터",
-          reason: "Watch deal newsletter thread",
+          name: formatThreadName(group),
+          reason: "Watch deal thread",
         });
       } catch (error) {
-        console.warn(`[warn] Failed to create watch newsletter thread: ${error.message}`);
+        console.warn(`[warn] Failed to create watch deal thread: ${error.message}`);
       }
 
-      for (const group of groupChunk) {
-        for (const watcher of group.watchers) {
-          recordWatchNotification(watcher.userId, watcher.deal);
-          if (watcher.expiryReminder && watcher.expiryAt) {
-            recordExpiryNotification("watch", watcher.deal, watcher.expiryAt, watcher.userId);
-            stats.expiryReminders += 1;
-          }
-          stats.sent += 1;
+      for (const watcher of group.watchers) {
+        recordWatchNotification(watcher.userId, watcher.deal);
+        if (watcher.expiryReminder && watcher.expiryAt) {
+          recordExpiryNotification("watch", watcher.deal, watcher.expiryAt, watcher.userId);
+          stats.expiryReminders += 1;
         }
+        stats.sent += 1;
       }
-      stats.cards += groupChunk.length;
+      stats.cards += 1;
     } catch (error) {
       stats.failed += 1;
-      console.warn(`[warn] Watch newsletter send failed: ${error.message}`);
+      console.warn(`[warn] Watch deal send failed: ${error.message}`);
     }
   }
 

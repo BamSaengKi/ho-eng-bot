@@ -48,6 +48,18 @@ function formatHistoryDate(value) {
   }).format(new Date(value));
 }
 
+function formatRelatedDeals(deals, usdToKrw) {
+  return deals.slice(0, 5).map((deal) => {
+    const discount = Math.round(Number(deal.savings));
+    return [
+      `**${deal.title}**`,
+      `${deal.storeName ?? `Store ${deal.storeID}`}`,
+      `${discount}%`,
+      formatDealPrice(deal.salePrice, deal, usdToKrw),
+    ].join(" · ");
+  }).join("\n");
+}
+
 function formatSingleHistory(history, usdToKrw) {
   const [record] = history ?? [];
   if (!record) return "이전 할인 정보가 없습니다.";
@@ -124,9 +136,17 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
 
   embed.addFields({
     name: "할인 기록",
-    value: options.hasHistoryChart ? `${options.historyCount}개 기록 저장됨 · 그래프 첨부` : formatSingleHistory(options.history, usdToKrw),
+    value: options.hasHistoryChart ? `${options.historyCount}개 기록 저장됨 · 날짜별 그래프 첨부` : formatSingleHistory(options.history, usdToKrw),
     inline: false,
   });
+
+  if (options.relatedEditions?.length > 0) {
+    embed.addFields({
+      name: "에디션 할인",
+      value: formatRelatedDeals(options.relatedEditions, usdToKrw).slice(0, 1024),
+      inline: false,
+    });
+  }
 
   if (options.hasHistoryChart) {
     embed.setImage(`attachment://${options.historyImageName ?? "discount-history.png"}`);

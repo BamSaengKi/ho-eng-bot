@@ -1,12 +1,30 @@
-import { AAA_COMPANIES, AAA_TITLE_KEYWORDS, EXCLUDED_TITLE_KEYWORDS } from "./config.js";
+import {
+  AAA_COMPANIES,
+  AAA_COMPANY_ONLY_MIN_STEAM_REVIEWS,
+  AAA_STRONG_TITLE_KEYWORDS,
+  AAA_TITLE_KEYWORDS,
+  EXCLUDED_TITLE_KEYWORDS,
+} from "./config.js";
 
 function normalize(value) {
-  return String(value ?? "").toLowerCase();
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/®|™/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function includesAny(source, needles) {
   const text = normalize(source);
-  return needles.some((needle) => text.includes(normalize(needle)));
+  return needles.some((needle) => {
+    const normalizedNeedle = normalize(needle);
+    if (!normalizedNeedle) return false;
+    return text === normalizedNeedle ||
+      text.startsWith(`${normalizedNeedle} `) ||
+      text.endsWith(` ${normalizedNeedle}`) ||
+      text.includes(` ${normalizedNeedle} `);
+  });
 }
 
 export function classifyAaaGame(deal, steamDetails) {
@@ -19,6 +37,8 @@ export function classifyAaaGame(deal, steamDetails) {
   const excludedKeyword = EXCLUDED_TITLE_KEYWORDS.find((keyword) => includesAny(title, [keyword]));
   const matchedCompany = AAA_COMPANIES.find((company) => includesAny(companyText, [company]));
   const matchedKeyword = AAA_TITLE_KEYWORDS.find((keyword) => includesAny(title, [keyword]));
+  const matchedStrongKeyword = AAA_STRONG_TITLE_KEYWORDS.find((keyword) => includesAny(title, [keyword]));
+  const steamReviewCount = Number(deal.steamRatingCount);
 
   if (excludedKeyword) {
     return {
@@ -27,17 +47,28 @@ export function classifyAaaGame(deal, steamDetails) {
     };
   }
 
-  if (matchedCompany) {
+  if (matchedCompany && matchedStrongKeyword) {
     return {
       isAaa: true,
-      reason: `AAA 회사 매칭: ${matchedCompany}`,
+      reason: `AAA 회사+타이틀 매칭: ${matchedCompany}, ${matchedStrongKeyword}`,
     };
   }
 
-  if (matchedKeyword) {
+  if (matchedStrongKeyword) {
     return {
       isAaa: true,
-      reason: `AAA 타이틀 매칭: ${matchedKeyword}`,
+      reason: `AAA 타이틀 매칭: ${matchedStrongKeyword}`,
+    };
+  }
+
+  if (
+    matchedCompany &&
+    Number.isFinite(steamReviewCount) &&
+    steamReviewCount >= AAA_COMPANY_ONLY_MIN_STEAM_REVIEWS
+  ) {
+    return {
+      isAaa: true,
+      reason: `AAA 회사+리뷰 규모 매칭: ${matchedCompany}, Steam 리뷰 ${steamReviewCount.toLocaleString("ko-KR")}개`,
     };
   }
 
