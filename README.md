@@ -153,7 +153,8 @@ Discord 채팅방에서 사용:
 - 관심 게임 알림도 `data/deals.sqlite`의 할인 기록을 사용하며 기록이 2개 이상이면 그래프를 첨부합니다.
 - 관심 게임 알림은 하루 단위 뉴스레터 메시지로 묶고, 유저를 멘션한 뒤 스레드를 만듭니다.
 - 같은 사용자/게임/스토어에서 같은 할인율과 가격은 1주일에 1번만 채널 알림으로 보냅니다.
-- `ITAD_API_KEY`가 있으면 IsThereAnyDeal에서 Steam 할인 종료일을 보조 조회해 카드에 표시합니다. 실패하거나 키가 없으면 `확인 불가`로 표시합니다.
+- `ITAD_API_KEY`가 있으면 IsThereAnyDeal에서 할인 종료일을 보조 조회해 카드에 표시합니다. 실패하거나 키가 없으면 `확인 불가`로 표시합니다.
+- 관심 게임 알림은 `ITAD_SHOPS`에 설정된 Steam, Epic Game Store, Ubisoft Store, Blizzard, Humble Store의 KR 할인도 함께 확인합니다.
 - 채팅에 `/사용법`을 보내면 봇 사용법을 답장합니다. Discord 개발자 포털에서 Message Content Intent가 켜져 있어야 합니다.
 
 ## AAA 판별

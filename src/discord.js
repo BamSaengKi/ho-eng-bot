@@ -63,14 +63,17 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
   const discount = Math.round(Number(deal.savings));
   const dealUrl = deal.storeUrl ? new URL(deal.storeUrl) : new URL(CHEAPSHARK_REDIRECT);
   if (!deal.storeUrl) dealUrl.searchParams.set("dealID", deal.dealID);
-  const storeName = REQUESTED_STORES.get(String(deal.storeID)) ?? `Store ${deal.storeID}`;
+  const storeName = deal.storeName ?? REQUESTED_STORES.get(String(deal.storeID)) ?? `Store ${deal.storeID}`;
   const developers = steamDetails?.developers?.join(", ") || "정보 없음";
   const publishers = steamDetails?.publishers?.join(", ") || "정보 없음";
+  const description = options.expiryReminder
+    ? `${storeName} 할인이 오늘 종료될 예정입니다.`
+    : `${storeName}에서 ${discount}% 할인 중입니다.`;
   const embed = new EmbedBuilder()
     .setColor(0x0f8f7f)
     .setTitle(deal.title)
     .setURL(dealUrl.toString())
-    .setDescription(`${storeName}에서 ${discount}% 할인 중입니다.`)
+    .setDescription(description)
     .setThumbnail(deal.thumb || null)
     .addFields(
       {

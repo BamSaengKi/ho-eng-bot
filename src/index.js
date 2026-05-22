@@ -8,9 +8,15 @@ import { classifyAaaGame } from "./classifier.js";
 import { REQUESTED_STORES } from "./config.js";
 import { buildDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
-import { getDealHistory, getGameKey, recordDealHistories } from "./history.js";
+import {
+  getDealHistory,
+  getGameKey,
+  hasExpiryNotification,
+  recordDealHistories,
+  recordExpiryNotification,
+} from "./history.js";
 import { handleInteraction } from "./interactions.js";
-import { fetchItadDealExpiry } from "./itad.js";
+import { fetchItadDealExpiry, isItadExpiryToday } from "./itad.js";
 import { postWatchDeals } from "./watch.js";
 import {
   applySteamRegionalPrice,
@@ -41,6 +47,8 @@ const config = {
   regionStrict: isStrictRegionEnabled(process.env.REGION_STRICT),
   steamLanguage: process.env.STEAM_LANGUAGE || "korean",
   itadApiKey: process.env.ITAD_API_KEY || "",
+  itadShopIds: process.env.ITAD_SHOP_IDS || "",
+  itadShopNames: process.env.ITAD_SHOPS || "",
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -187,6 +195,7 @@ async function collectAaaDeals() {
 
   return {
     deals,
+    historyItems,
     historyCount: historyItems.length,
     sentDealIds,
     storeSummaries,
@@ -200,11 +209,14 @@ async function postDailyDeals(client) {
     throw new Error("DISCORD_CHANNEL_ID is not a text channel the bot can access.");
   }
 
-  const { deals, sentDealIds, usdToKrw } = await collectAaaDeals();
+  const { deals, historyItems, sentDealIds, usdToKrw } = await collectAaaDeals();
   if (deals.length === 0) {
-    await channel.send({
-      content: "오늘은 할인정보가 없어요.",
-    });
+    const expiryReminderCount = await postDailyExpiryReminders(channel, historyItems, usdToKrw);
+    if (expiryReminderCount === 0) {
+      await channel.send({
+        content: "오늘은 할인정보가 없어요.",
+      });
+    }
     console.log("[info] No new AAA discounts matched today.");
     return;
   }
@@ -241,6 +253,50 @@ async function postDailyDeals(client) {
     dealIds: [...sentDealIds],
   });
   console.log(`[info] Posted ${deals.length} deals.`);
+
+  await postDailyExpiryReminders(channel, historyItems, usdToKrw);
+}
+
+async function postDailyExpiryReminders(channel, deals, usdToKrw) {
+  const reminderItems = [];
+  for (const item of deals) {
+    const dealExpiry = await fetchItadDealExpiry(item.deal, config);
+    if (!isItadExpiryToday(dealExpiry) || hasExpiryNotification("daily", item.deal, dealExpiry.raw)) {
+      continue;
+    }
+    reminderItems.push({ ...item, dealExpiry });
+  }
+
+  if (reminderItems.length === 0) return 0;
+
+  await channel.send({
+    content: `오늘 할인 종료 예정인 AAA급 게임 ${reminderItems.length}개가 있습니다.`,
+  });
+
+  for (const item of reminderItems) {
+    const history = getDealHistory(item.deal);
+    const chart = await generateDiscountHistoryChartPng(history, item.deal.title);
+    const files = chart
+      ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
+      : [];
+
+    await channel.send({
+      embeds: [
+        buildDealEmbed(item.deal, item.steamDetails, item.aaaReason, usdToKrw, {
+          hasHistoryChart: Boolean(chart),
+          historyCount: history.length,
+          history,
+          dealExpiry: item.dealExpiry,
+          expiryReminder: true,
+          lookupLabel: `${config.region} Steam 할인 종료 알림\n오늘 할인 종료일이에요.`,
+          footerText: "할인 종료 알림",
+        }),
+      ],
+      files,
+    });
+    recordExpiryNotification("daily", item.deal, item.dealExpiry.raw);
+  }
+  return reminderItems.length;
 }
 
 async function postScheduledNotifications(client) {
