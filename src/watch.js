@@ -1,5 +1,5 @@
 import { AttachmentBuilder } from "discord.js";
-import { fetchUsdToKrw } from "./api.js";
+import { fetchSteamAppDetails, fetchSteamAppReviews, fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { buildDealEmbed } from "./discord.js";
 import {
@@ -13,6 +13,7 @@ import {
   recordWatchNotification,
 } from "./history.js";
 import { fetchItadCurrentDeals, fetchItadDealExpiry, isItadExpiryToday } from "./itad.js";
+import { getSteamRegionOptions } from "./region.js";
 import { findCurrentDealFromStoredGame } from "./search.js";
 
 const MAX_EMBEDS_PER_MESSAGE = 10;
@@ -43,6 +44,32 @@ function createWatchProbeDeal(watch, result) {
   };
 }
 
+async function enrichWithSteamInfo(candidate, watch, config) {
+  const steamAppId = candidate.deal.steamAppID ?? watch.steamAppId;
+  if (!steamAppId) return candidate;
+
+  const [steamDetails, review] = await Promise.all([
+    candidate.steamDetails
+      ? Promise.resolve(candidate.steamDetails)
+      : fetchSteamAppDetails(steamAppId, getSteamRegionOptions(config)).catch(() => null),
+    candidate.deal.steamRatingPercent && candidate.deal.steamRatingCount
+      ? Promise.resolve(null)
+      : fetchSteamAppReviews(steamAppId).catch(() => null),
+  ]);
+
+  return {
+    ...candidate,
+    steamDetails,
+    deal: {
+      ...candidate.deal,
+      steamAppID: steamAppId,
+      steamRatingPercent: candidate.deal.steamRatingPercent ?? review?.steamRatingPercent,
+      steamRatingCount: candidate.deal.steamRatingCount ?? review?.steamRatingCount,
+      thumb: candidate.deal.thumb ?? steamDetails?.header_image,
+    },
+  };
+}
+
 async function collectWatchDealCandidates(watch, config) {
   const candidates = [];
   const result = await findCurrentDealFromStoredGame(watch, config);
@@ -69,7 +96,7 @@ async function collectWatchDealCandidates(watch, config) {
   }
 
   const seen = new Set();
-  return candidates.filter((candidate) => {
+  const uniqueCandidates = candidates.filter((candidate) => {
     const key = [
       getGameKey(candidate.deal),
       candidate.deal.storeID,
@@ -81,6 +108,8 @@ async function collectWatchDealCandidates(watch, config) {
     seen.add(key);
     return true;
   });
+
+  return Promise.all(uniqueCandidates.map((candidate) => enrichWithSteamInfo(candidate, watch, config)));
 }
 
 function formatNewsletterContent(groups, totalCount) {
@@ -197,7 +226,7 @@ export async function postWatchDeals(client, config) {
         dealExpiry: group.dealExpiry,
         expiryReminder: group.expiryReminder,
         historyImageName,
-        lookupLabel: `${config.region} Steam 개인 관심 게임\n${watcherLabel}`,
+        lookupLabel: `${config.region} 개인 관심 게임\n${watcherLabel}`,
         footerText: group.expiryReminder ? "관심 게임 할인 종료 알림" : "관심 게임 할인 뉴스레터",
       }));
     }

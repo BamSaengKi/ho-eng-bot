@@ -109,7 +109,7 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
       {
         name: "지역 기준",
         value: deal.regionVerified
-          ? `${deal.region ?? "KR"} Steam 가격 검증됨`
+          ? `${deal.region ?? "KR"} ${storeName} 가격 확인됨`
           : `${deal.region ?? "KR"} 구매 가능 여부 미검증`,
         inline: false,
       },
