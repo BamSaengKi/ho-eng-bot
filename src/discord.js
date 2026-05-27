@@ -60,6 +60,19 @@ function formatRelatedDeals(deals, usdToKrw) {
   }).join("\n");
 }
 
+function formatSeriesDeals(items, usdToKrw) {
+  return items.slice(0, 10).map((item) => {
+    const deal = item.deal;
+    const title = deal.storeUrl ? `[${deal.title}](${deal.storeUrl})` : `**${deal.title}**`;
+    return [
+      title,
+      `${deal.storeName ?? `Store ${deal.storeID}`}`,
+      `${Math.round(Number(deal.savings))}%`,
+      formatDealPrice(deal.salePrice, deal, usdToKrw),
+    ].join(" · ");
+  }).join("\n");
+}
+
 function formatSingleHistory(history, usdToKrw) {
   const [record] = history ?? [];
   if (!record) return "이전 할인 정보가 없습니다.";
@@ -142,7 +155,7 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
 
   if (options.relatedEditions?.length > 0) {
     embed.addFields({
-      name: "에디션 할인",
+      name: "DLC/에디션 할인",
       value: formatRelatedDeals(options.relatedEditions, usdToKrw).slice(0, 1024),
       inline: false,
     });
@@ -150,6 +163,43 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
 
   if (options.hasHistoryChart) {
     embed.setImage(`attachment://${options.historyImageName ?? "discount-history.png"}`);
+  }
+
+  return embed;
+}
+
+export function buildSeriesDealEmbed(group, usdToKrw, options = {}) {
+  const representative = group.items[0]?.deal;
+  const embed = new EmbedBuilder()
+    .setColor(0x0f8f7f)
+    .setTitle(`${group.label} 시리즈 할인`)
+    .setURL(representative?.storeUrl ?? null)
+    .setDescription(`${group.items.length}개 작품이 할인 중입니다.`)
+    .setThumbnail(representative?.thumb || null)
+    .addFields(
+      {
+        name: "할인 작품",
+        value: formatSeriesDeals(group.items, usdToKrw).slice(0, 1024),
+        inline: false,
+      },
+      {
+        name: "지역 기준",
+        value: `${options.region ?? "KR"} ITAD 가격 확인됨`,
+        inline: false,
+      },
+    )
+    .setFooter({ text: options.footerText ?? "오늘의 할인 정보" })
+    .setTimestamp(new Date());
+
+  if (group.relatedContent?.length > 0) {
+    embed.addFields({
+      name: "DLC/에디션 할인",
+      value: [
+        `이 시리즈의 DLC/특별판도 ${group.relatedContent.length}개 할인 중입니다.`,
+        formatRelatedDeals(group.relatedContent, usdToKrw),
+      ].join("\n").slice(0, 1024),
+      inline: false,
+    });
   }
 
   return embed;

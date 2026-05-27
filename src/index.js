@@ -5,8 +5,8 @@ import { resolve } from "node:path";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { classifyAaaGame } from "./classifier.js";
-import { SPECIAL_EDITION_KEYWORDS } from "./config.js";
-import { buildDealEmbed } from "./discord.js";
+import { FRANCHISE_GROUPS, RELATED_CONTENT_KEYWORDS, SPECIAL_EDITION_KEYWORDS } from "./config.js";
+import { buildDealEmbed, buildSeriesDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
 import {
   getDealHistory,
@@ -95,6 +95,17 @@ function printDryRunDeals(deals, usdToKrw, storeSummaries) {
 
   console.log(`[info] Matched ${deals.length} AAA discounts. USD/KRW=${usdToKrw}`);
   for (const [index, item] of deals.entries()) {
+    if (item.type === "series") {
+      console.log(
+        [
+          `${index + 1}. ${item.label} 시리즈 할인`,
+          `   games: ${item.items.map((entry) => entry.deal.title).join(", ")}`,
+          `   related: ${item.relatedContent?.length ?? 0} DLC/edition item(s)`,
+        ].join("\n"),
+      );
+      continue;
+    }
+
     const storeName = item.deal.storeName ?? `Store ${item.deal.storeID}`;
     console.log(
       [
@@ -102,6 +113,7 @@ function printDryRunDeals(deals, usdToKrw, storeSummaries) {
         `   store: ${storeName}`,
         `   discount: ${formatPercent(item.deal.savings)}`,
         `   price: ${formatDryRunPrice(item.deal.salePrice, item.deal.priceCurrency)} (normal ${formatDryRunPrice(item.deal.normalPrice, item.deal.priceCurrency)})`,
+        `   related: ${item.relatedEditions?.length ?? 0} DLC/edition item(s)`,
         `   reason: ${item.aaaReason}`,
       ].join("\n"),
     );
@@ -155,9 +167,21 @@ function isSpecialEditionTitle(title) {
   return SPECIAL_EDITION_KEYWORDS.some((keyword) => normalized.includes(normalizeTitleText(keyword)));
 }
 
+function isRelatedContentTitle(title) {
+  const normalized = normalizeTitleText(title);
+  return RELATED_CONTENT_KEYWORDS.some((keyword) => normalized.includes(normalizeTitleText(keyword)));
+}
+
+function getFranchiseGroup(title) {
+  const normalized = normalizeTitleText(title);
+  return FRANCHISE_GROUPS.find((group) =>
+    group.keywords.some((keyword) => normalized.includes(normalizeTitleText(keyword))),
+  ) ?? null;
+}
+
 function getBaseTitle(title) {
   let normalized = normalizeTitleText(title);
-  for (const keyword of SPECIAL_EDITION_KEYWORDS) {
+  for (const keyword of RELATED_CONTENT_KEYWORDS) {
     normalized = normalized.replace(new RegExp(`\\b${normalizeTitleText(keyword).replaceAll(" ", "\\s+")}\\b`, "gi"), " ");
   }
   return normalized
@@ -168,7 +192,8 @@ function getBaseTitle(title) {
 function attachRelatedEditions(baseItems, editionItems) {
   const editionsByBase = new Map();
   for (const item of editionItems) {
-    const baseTitle = getBaseTitle(item.deal.title);
+    const group = getFranchiseGroup(item.deal.title);
+    const baseTitle = group?.key ?? getBaseTitle(item.deal.title);
     if (!baseTitle) continue;
     const editions = editionsByBase.get(baseTitle) ?? [];
     editions.push(item.deal);
@@ -177,10 +202,61 @@ function attachRelatedEditions(baseItems, editionItems) {
 
   return baseItems.map((item) => ({
     ...item,
-    relatedEditions: (editionsByBase.get(getBaseTitle(item.deal.title)) ?? [])
+    relatedEditions: (editionsByBase.get(getFranchiseGroup(item.deal.title)?.key ?? getBaseTitle(item.deal.title)) ?? [])
       .sort((a, b) => Number(b.savings) - Number(a.savings))
       .slice(0, 5),
   }));
+}
+
+function groupDisplayDeals(items) {
+  const grouped = new Map();
+  const singles = [];
+
+  for (const item of items) {
+    const group = getFranchiseGroup(item.deal.title);
+    if (!group) {
+      singles.push({ type: "deal", ...item });
+      continue;
+    }
+
+    const existing = grouped.get(group.key) ?? {
+      type: "series",
+      key: group.key,
+      label: group.label,
+      items: [],
+      relatedContent: [],
+    };
+    existing.items.push(item);
+    existing.relatedContent.push(...(item.relatedEditions ?? []));
+    grouped.set(group.key, existing);
+  }
+
+  const displayItems = [];
+  for (const group of grouped.values()) {
+    group.items.sort((a, b) => Number(b.deal.savings) - Number(a.deal.savings));
+    group.relatedContent = [...new Map(
+      group.relatedContent.map((deal) => [`${deal.title}:${deal.storeID}:${deal.salePrice}`, deal]),
+    ).values()].sort((a, b) => Number(b.savings) - Number(a.savings)).slice(0, 8);
+
+    if (group.items.length >= 2) {
+      displayItems.push(group);
+    } else {
+      const [item] = group.items;
+      displayItems.push({
+        type: "deal",
+        ...item,
+        relatedEditions: group.relatedContent.length > 0 ? group.relatedContent : item.relatedEditions,
+      });
+    }
+  }
+
+  displayItems.push(...singles);
+  return displayItems
+    .sort((a, b) => {
+      const leftSavings = a.type === "series" ? Math.max(...a.items.map((item) => Number(item.deal.savings))) : Number(a.deal.savings);
+      const rightSavings = b.type === "series" ? Math.max(...b.items.map((item) => Number(item.deal.savings))) : Number(b.deal.savings);
+      return rightSavings - leftSavings;
+    });
 }
 
 async function collectAaaDeals() {
@@ -199,8 +275,8 @@ async function collectAaaDeals() {
   try {
     const rawItems = await fetchItadDealFeed(config);
     storeSummaries[0].discountedCount = rawItems.length;
-    const baseRawItems = rawItems.filter((item) => !isSpecialEditionTitle(item.deal.title));
-    const editionRawItems = rawItems.filter((item) => isSpecialEditionTitle(item.deal.title));
+    const baseRawItems = rawItems.filter((item) => !isRelatedContentTitle(item.deal.title));
+    const editionRawItems = rawItems.filter((item) => isRelatedContentTitle(item.deal.title) || isSpecialEditionTitle(item.deal.title));
     const titleCandidates = baseRawItems.filter((item) => classifyAaaGame(item.deal, item.steamDetails).isAaa);
     const topDiscountCandidates = baseRawItems.slice(0, 100);
     const editionItems = await enrichItadFeedItems(editionRawItems);
@@ -228,16 +304,14 @@ async function collectAaaDeals() {
   }
 
   const notificationItems = historyItems.filter((item) => {
-    if (config.dryRun && config.includeSent) return true;
+    if (config.includeSent) return true;
     if (!sentDealIds.has(item.deal.dealID)) return true;
 
     const historyKey = `${getGameKey(item.deal)}:${item.deal.storeID}`;
     return savedHistory.get(historyKey) === true;
   });
 
-  const deals = notificationItems
-    .sort((a, b) => Number(b.deal.savings) - Number(a.deal.savings))
-    .slice(0, config.maxDeals);
+  const deals = groupDisplayDeals(notificationItems).slice(0, config.maxDeals);
 
   return {
     deals,
@@ -272,6 +346,21 @@ async function postDailyDeals(client) {
   });
 
   for (const item of deals) {
+    if (item.type === "series") {
+      await channel.send({
+        embeds: [
+          buildSeriesDealEmbed(item, usdToKrw, {
+            region: config.region,
+            footerText: "오늘의 할인 정보",
+          }),
+        ],
+      });
+      for (const entry of item.items) {
+        sentDealIds.add(entry.deal.dealID);
+      }
+      continue;
+    }
+
     const history = getDealHistory(item.deal);
     const dealExpiry = item.dealExpiry ?? await fetchItadDealExpiry(item.deal, config);
     const chart = await generateDiscountHistoryChartPng(history, item.deal.title);
