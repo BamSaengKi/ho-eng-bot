@@ -24,6 +24,14 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function formatDateKey(value) {
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
+}
+
 function formatPrice(value, currency = "USD") {
   return new Intl.NumberFormat(currency === "KRW" ? "ko-KR" : "en-US", {
     style: "currency",
@@ -32,25 +40,39 @@ function formatPrice(value, currency = "USD") {
   }).format(Number(value));
 }
 
-function uniqueByDateAndPrice(history) {
-  const seen = new Set();
-  return history.filter((point) => {
-    const key = `${point.checkedAt}:${point.salePriceUsd}:${point.savingsPercent}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+function prepareChartPoints(history) {
+  const daily = new Map();
+  for (const point of history) {
+    const dateKey = formatDateKey(point.checkedAt);
+    const previous = daily.get(dateKey);
+    const currentPrice = Number(point.salePriceUsd);
+    const previousPrice = Number(previous?.salePriceUsd);
+    if (
+      !previous ||
+      currentPrice < previousPrice ||
+      (currentPrice === previousPrice && new Date(point.checkedAt) > new Date(previous.checkedAt))
+    ) {
+      daily.set(dateKey, point);
+    }
+  }
+
+  return [...daily.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([, point]) => point);
 }
 
 function buildSvg(history, title) {
-  const points = uniqueByDateAndPrice(history);
+  const points = prepareChartPoints(history);
   const currency = points.find((point) => point.priceCurrency)?.priceCurrency || "USD";
   const chartWidth = WIDTH - PAD.left - PAD.right;
   const chartHeight = HEIGHT - PAD.top - PAD.bottom;
   const prices = points.map((point) => Number(point.salePriceUsd));
   const discounts = points.map((point) => Number(point.savingsPercent));
-  const maxPrice = Math.max(...prices, 1);
-  const minPrice = Math.min(...prices, maxPrice);
+  const rawMaxPrice = Math.max(...prices, 1);
+  const rawMinPrice = Math.min(...prices, rawMaxPrice);
+  const rawPriceRange = Math.max(rawMaxPrice - rawMinPrice, Math.max(rawMaxPrice * 0.08, 1));
+  const maxPrice = rawMaxPrice + rawPriceRange * 0.12;
+  const minPrice = Math.max(0, rawMinPrice - rawPriceRange * 0.12);
   const priceRange = Math.max(maxPrice - minPrice, 1);
   const xStep = points.length > 1 ? chartWidth / (points.length - 1) : 0;
 
@@ -78,10 +100,13 @@ function buildSvg(history, title) {
     const labelAnchor = points.length === 1 ? "middle" : index === 0 ? "start" : index === points.length - 1 ? "end" : "middle";
     const valueAnchor = points.length === 1 ? "middle" : index === 0 ? "start" : index === points.length - 1 ? "end" : "middle";
     const valueX = index === 0 ? point.x + 8 : index === points.length - 1 ? point.x - 8 : point.x;
+    const valueY = index % 2 === 0
+      ? Math.max(PAD.top + 28, point.y - 16)
+      : Math.min(HEIGHT - PAD.bottom - 12, point.y + 28);
     const value = `${Math.round(point.savingsPercent)}% · ${formatPrice(point.salePriceUsd, point.priceCurrency || currency)}`;
     return `
       <text x="${point.x}" y="${HEIGHT - 38}" text-anchor="${labelAnchor}" font-size="15" fill="#64748b">${formatDate(point.checkedAt)}</text>
-      <text x="${valueX}" y="${Math.max(PAD.top + 24, point.y - 16)}" text-anchor="${valueAnchor}" font-size="15" font-weight="700" fill="#0f766e">${value}</text>
+      <text x="${valueX}" y="${valueY}" text-anchor="${valueAnchor}" font-size="14" font-weight="700" fill="#0f766e">${value}</text>
       <circle cx="${point.x}" cy="${point.y}" r="7" fill="#0f8f7f" stroke="#ffffff" stroke-width="3" />
     `;
   }).join("");
@@ -107,7 +132,7 @@ function buildSvg(history, title) {
 }
 
 export async function generateDiscountHistoryChartPng(history, title) {
-  if (history.length < 2) return null;
+  if (prepareChartPoints(history).length < 2) return null;
 
   const svg = buildSvg(history, title);
   return sharp(Buffer.from(svg)).png().toBuffer();

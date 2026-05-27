@@ -6,6 +6,7 @@ import { REQUESTED_STORES } from "./config.js";
 const DATA_DIR = resolve(process.env.DATA_DIR || "data");
 const DB_PATH = resolve(process.env.DB_PATH || resolve(DATA_DIR, "deals.sqlite"));
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_SAME_DISCOUNT_COOLDOWN_MS = ONE_WEEK_MS;
 
 function normalizeTitle(value) {
   return String(value ?? "")
@@ -471,10 +472,11 @@ function hasRecentSameDiscount(db, deal, checkedAt, maxAgeMs) {
 }
 
 function shouldInsertHistory(db, deal, checkedAt, options = {}) {
-  if (hasRecentSameDiscount(db, deal, checkedAt, options.sameDiscountCooldownMs)) {
+  const sameDiscountCooldownMs = options.sameDiscountCooldownMs ?? DEFAULT_SAME_DISCOUNT_COOLDOWN_MS;
+  if (hasRecentSameDiscount(db, deal, checkedAt, sameDiscountCooldownMs)) {
     return false;
   }
-  if (options.sameDiscountCooldownMs) return true;
+  if (sameDiscountCooldownMs) return true;
 
   const last = getLastHistory(db, getGameKey(deal), deal.storeID);
   if (!last) return true;
@@ -549,9 +551,7 @@ export function recordDealHistories(items, checkedAt = new Date().toISOString(),
 }
 
 export function recordDealLookupHistory(item, checkedAt = new Date().toISOString()) {
-  return recordDealHistories([item], checkedAt, {
-    sameDiscountCooldownMs: ONE_WEEK_MS,
-  });
+  return recordDealHistories([item], checkedAt);
 }
 
 export function getDealHistory(deal, limit = 20) {
