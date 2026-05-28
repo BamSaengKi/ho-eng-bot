@@ -64,13 +64,21 @@ function formatSeriesDeals(items, usdToKrw) {
   return items.slice(0, 10).map((item) => {
     const deal = item.deal;
     const title = deal.storeUrl ? `[${deal.title}](${deal.storeUrl})` : `**${deal.title}**`;
+    const expiry = item.dealExpiry?.formatted ? `종료 ${item.dealExpiry.formatted}` : "종료 확인 불가";
     return [
       title,
       `${deal.storeName ?? `Store ${deal.storeID}`}`,
       `${Math.round(Number(deal.savings))}%`,
       formatDealPrice(deal.salePrice, deal, usdToKrw),
+      expiry,
     ].join(" · ");
   }).join("\n");
+}
+
+function formatSeriesReasons(items) {
+  return [...new Set(items.map((item) => item.aaaReason).filter(Boolean))]
+    .slice(0, 5)
+    .join("\n");
 }
 
 function formatSingleHistory(history, usdToKrw) {
@@ -173,13 +181,17 @@ export function buildSeriesDealEmbed(group, usdToKrw, options = {}) {
   const embed = new EmbedBuilder()
     .setColor(0x0f8f7f)
     .setTitle(`${group.label} 시리즈 할인`)
-    .setURL(representative?.storeUrl ?? null)
     .setDescription(`${group.items.length}개 작품이 할인 중입니다.`)
     .setThumbnail(representative?.thumb || null)
     .addFields(
       {
         name: "할인 작품",
         value: formatSeriesDeals(group.items, usdToKrw).slice(0, 1024),
+        inline: false,
+      },
+      {
+        name: "AAA 판별",
+        value: formatSeriesReasons(group.items) || "시리즈 할인 묶음",
         inline: false,
       },
       {
@@ -190,6 +202,10 @@ export function buildSeriesDealEmbed(group, usdToKrw, options = {}) {
     )
     .setFooter({ text: options.footerText ?? "오늘의 할인 정보" })
     .setTimestamp(new Date());
+
+  if (representative?.storeUrl) {
+    embed.setURL(representative.storeUrl);
+  }
 
   if (group.relatedContent?.length > 0) {
     embed.addFields({

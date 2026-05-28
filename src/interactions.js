@@ -20,6 +20,8 @@ import {
   findStoredGamesByTitle,
   getDealHistory,
   getDealHistoryByGameKey,
+  deleteWatchShareContext,
+  getWatchShareContext,
   getWatchSubscriptionById,
   listAliases,
   listWatchSubscriptions,
@@ -185,6 +187,18 @@ function buildWatchShareConfirmButtons(id) {
       .setLabel("취소")
       .setStyle(ButtonStyle.Secondary),
   );
+}
+
+function isWatchShareToken(value) {
+  return !String(value).includes(":");
+}
+
+function parseWatchSharePayload(value) {
+  const [watchId, encodedStoreId] = String(value).split(":");
+  return {
+    watchId,
+    storeId: encodedStoreId ? decodeURIComponent(encodedStoreId) : null,
+  };
 }
 
 function formatElapsedSeconds(startedAt) {
@@ -622,7 +636,31 @@ async function handleDealShareConfirm(interaction, config) {
 }
 
 async function handleWatchShare(interaction) {
-  const watchId = interaction.customId.replace("watch_share:", "");
+  const payload = interaction.customId.replace("watch_share:", "");
+  if (isWatchShareToken(payload)) {
+    const context = getWatchShareContext(payload);
+    if (!context) {
+      await interaction.reply({
+        content: "공유할 관심 게임 할인 정보가 만료되었습니다. 다음 할인 알림에서 다시 공유해주세요.",
+      });
+      return;
+    }
+
+    if (context.userId !== interaction.user.id) {
+      await interaction.reply({
+        content: "이 공유 버튼은 관심 게임을 등록한 사용자만 사용할 수 있습니다.",
+      });
+      return;
+    }
+
+    await interaction.reply({
+      content: `"${context.title}" 할인 정보를 공지 채널에 공개로 공유하고 스레드를 만들까요?`,
+      components: [buildWatchShareConfirmButtons(payload)],
+    });
+    return;
+  }
+
+  const { watchId } = parseWatchSharePayload(payload);
   const watch = getWatchSubscriptionById(watchId);
   if (!watch) {
     await interaction.reply({
@@ -640,12 +678,29 @@ async function handleWatchShare(interaction) {
 
   await interaction.reply({
     content: `"${watch.title}" 할인 정보를 공지 채널에 공개로 공유하고 스레드를 만들까요?`,
-    components: [buildWatchShareConfirmButtons(watchId)],
+    components: [buildWatchShareConfirmButtons(payload)],
   });
 }
 
 async function handleWatchShareCancel(interaction) {
-  const watchId = interaction.customId.replace("watch_share_cancel:", "");
+  const payload = interaction.customId.replace("watch_share_cancel:", "");
+  if (isWatchShareToken(payload)) {
+    const context = getWatchShareContext(payload);
+    if (context && context.userId !== interaction.user.id) {
+      await interaction.reply({
+        content: "이 공유 확인은 관심 게임을 등록한 사용자만 사용할 수 있습니다.",
+      });
+      return;
+    }
+
+    await interaction.update({
+      content: "공유를 취소했습니다.",
+      components: [],
+    });
+    return;
+  }
+
+  const { watchId } = parseWatchSharePayload(payload);
   const watch = getWatchSubscriptionById(watchId);
   if (watch && watch.userId !== interaction.user.id) {
     await interaction.reply({
@@ -661,7 +716,35 @@ async function handleWatchShareCancel(interaction) {
 }
 
 async function handleWatchShareConfirm(interaction, config) {
-  const watchId = interaction.customId.replace("watch_share_confirm:", "");
+  const payload = interaction.customId.replace("watch_share_confirm:", "");
+  if (isWatchShareToken(payload)) {
+    const context = getWatchShareContext(payload);
+    if (!context) {
+      await interaction.update({
+        content: "공유할 관심 게임 할인 정보가 만료되었습니다. 다음 할인 알림에서 다시 공유해주세요.",
+        components: [],
+      });
+      return;
+    }
+
+    if (context.userId !== interaction.user.id) {
+      await interaction.reply({
+        content: "이 공유 확인은 관심 게임을 등록한 사용자만 사용할 수 있습니다.",
+      });
+      return;
+    }
+
+    await interaction.update({
+      content: "공유 중입니다...",
+      components: [],
+    });
+
+    await shareWatchDealContext(interaction, config, context);
+    deleteWatchShareContext(payload);
+    return;
+  }
+
+  const { watchId, storeId } = parseWatchSharePayload(payload);
   const watch = getWatchSubscriptionById(watchId);
   if (!watch) {
     await interaction.update({
@@ -689,6 +772,18 @@ async function handleWatchShareConfirm(interaction, config) {
     return;
   }
 
+  const selectedDeal = storeId
+    ? (result.allDeals ?? [])
+      .find((item) => String(item.deal.storeID) === storeId && Number(item.deal.savings) >= Number(config.minDiscount ?? 1))
+    : null;
+  const shareResult = selectedDeal
+    ? {
+      deal: selectedDeal.deal,
+      steamDetails: result.steamDetails,
+      dealExpiry: selectedDeal.dealExpiry,
+    }
+    : result;
+
   const channel = await interaction.client.channels.fetch(config.channelId);
   if (!channel?.isTextBased()) {
     await interaction.editReply("공유할 공지 채널을 찾지 못했습니다.");
@@ -697,12 +792,12 @@ async function handleWatchShareConfirm(interaction, config) {
 
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
   recordDealLookupHistory({
-    deal: result.deal,
-    steamDetails: result.steamDetails,
+    deal: shareResult.deal,
+    steamDetails: shareResult.steamDetails,
   });
-  const history = getDealHistory(result.deal);
-  const dealExpiry = result.dealExpiry ?? await fetchItadDealExpiry(result.deal, config);
-  const chart = await generateDiscountHistoryChartPng(history, result.deal.title);
+  const history = getDealHistory(shareResult.deal);
+  const dealExpiry = shareResult.dealExpiry ?? await fetchItadDealExpiry(shareResult.deal, config);
+  const chart = await generateDiscountHistoryChartPng(history, shareResult.deal.title);
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
     : [];
@@ -710,7 +805,7 @@ async function handleWatchShareConfirm(interaction, config) {
   const message = await channel.send({
     content: `<@${interaction.user.id}>님이 관심 게임 할인 정보를 공유했습니다.`,
     embeds: [
-      buildDealEmbed(result.deal, result.steamDetails, "개인 관심 게임 공유", usdToKrw, {
+      buildDealEmbed(shareResult.deal, shareResult.steamDetails, "개인 관심 게임 공유", usdToKrw, {
         hasHistoryChart: Boolean(chart),
         historyCount: history.length,
         history,
@@ -724,7 +819,60 @@ async function handleWatchShareConfirm(interaction, config) {
 
   try {
     await message.startThread({
-      name: truncate(`${result.deal.title} 할인 정보`, 100),
+      name: truncate(`${shareResult.deal.title} 할인 정보`, 100),
+      reason: "Watch deal share thread",
+    });
+  } catch (error) {
+    console.warn(`[warn] Failed to create watch share thread: ${error.message}`);
+    await interaction.editReply("할인 정보는 공유했지만 스레드 생성은 실패했습니다.");
+    return;
+  }
+
+  await interaction.editReply("할인 정보를 공지 채널에 공유하고 스레드를 만들었습니다.");
+}
+
+async function shareWatchDealContext(interaction, config, context) {
+  if (!context.deal || Number(context.deal.savings) < Number(config.minDiscount ?? 1)) {
+    await interaction.editReply("현재 공유할 수 있는 할인 정보를 찾지 못했습니다.");
+    return;
+  }
+
+  const channel = await interaction.client.channels.fetch(config.channelId);
+  if (!channel?.isTextBased()) {
+    await interaction.editReply("공유할 공지 채널을 찾지 못했습니다.");
+    return;
+  }
+
+  const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
+  recordDealLookupHistory({
+    deal: context.deal,
+    steamDetails: context.steamDetails,
+  });
+  const history = getDealHistory(context.deal);
+  const dealExpiry = context.dealExpiry ?? await fetchItadDealExpiry(context.deal, config);
+  const chart = await generateDiscountHistoryChartPng(history, context.deal.title);
+  const files = chart
+    ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
+    : [];
+  const displayName = getUserDisplayName(interaction);
+  const message = await channel.send({
+    content: `<@${interaction.user.id}>님이 관심 게임 할인 정보를 공유했습니다.`,
+    embeds: [
+      buildDealEmbed(context.deal, context.steamDetails, "개인 관심 게임 공유", usdToKrw, {
+        hasHistoryChart: Boolean(chart),
+        historyCount: history.length,
+        history,
+        dealExpiry,
+        lookupLabel: `${config.region} 개인 관심 게임\n${displayName}님이 관심 게임으로 등록한 할인 정보입니다.`,
+        footerText: "공유된 관심 게임 할인 정보",
+      }),
+    ],
+    files,
+  });
+
+  try {
+    await message.startThread({
+      name: truncate(`${context.deal.title} 할인 정보`, 100),
       reason: "Watch deal share thread",
     });
   } catch (error) {
