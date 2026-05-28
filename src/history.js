@@ -115,12 +115,132 @@ function openDatabase() {
       notified_at TEXT NOT NULL,
       UNIQUE(scope, user_id, game_key, store_id, expiry_at)
     );
+
+    CREATE TABLE IF NOT EXISTS watch_share_contexts (
+      token TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      watch_id INTEGER,
+      title TEXT NOT NULL,
+      store_id TEXT NOT NULL,
+      deal_json TEXT NOT NULL,
+      steam_details_json TEXT,
+      deal_expiry_json TEXT,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS app_notifications (
+      key TEXT PRIMARY KEY,
+      sent_at TEXT NOT NULL
+    );
   `);
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
     db.exec("ALTER TABLE deal_history ADD COLUMN price_currency TEXT NOT NULL DEFAULT 'USD'");
   }
   return db;
+}
+
+function parseJson(value, fallback = null) {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+export function saveWatchShareContext({
+  token,
+  userId,
+  watchId,
+  title,
+  storeId,
+  deal,
+  steamDetails,
+  dealExpiry,
+  createdAt = new Date().toISOString(),
+  expiresAt,
+}) {
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT OR REPLACE INTO watch_share_contexts (
+        token,
+        user_id,
+        watch_id,
+        title,
+        store_id,
+        deal_json,
+        steam_details_json,
+        deal_expiry_json,
+        created_at,
+        expires_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      token,
+      userId,
+      watchId ?? null,
+      title,
+      String(storeId ?? ""),
+      JSON.stringify(deal),
+      steamDetails ? JSON.stringify(steamDetails) : null,
+      dealExpiry ? JSON.stringify(dealExpiry) : null,
+      createdAt,
+      expiresAt,
+    );
+  } finally {
+    db.close();
+  }
+}
+
+export function getWatchShareContext(token) {
+  const db = openDatabase();
+  try {
+    const row = db.prepare(`
+      SELECT
+        token,
+        user_id AS userId,
+        watch_id AS watchId,
+        title,
+        store_id AS storeId,
+        deal_json AS dealJson,
+        steam_details_json AS steamDetailsJson,
+        deal_expiry_json AS dealExpiryJson,
+        created_at AS createdAt,
+        expires_at AS expiresAt
+      FROM watch_share_contexts
+      WHERE token = ?
+    `).get(token);
+
+    if (!row) return null;
+    if (new Date(row.expiresAt).getTime() <= Date.now()) return null;
+
+    return {
+      token: row.token,
+      userId: row.userId,
+      watchId: row.watchId,
+      title: row.title,
+      storeId: row.storeId,
+      deal: parseJson(row.dealJson),
+      steamDetails: parseJson(row.steamDetailsJson),
+      dealExpiry: parseJson(row.dealExpiryJson),
+      createdAt: row.createdAt,
+      expiresAt: row.expiresAt,
+    };
+  } finally {
+    db.close();
+  }
+}
+
+export function deleteWatchShareContext(token) {
+  const db = openDatabase();
+  try {
+    db.prepare("DELETE FROM watch_share_contexts WHERE token = ?").run(token);
+  } finally {
+    db.close();
+  }
 }
 
 export function hasExpiryNotification(scope, deal, expiryAt, userId = null) {
@@ -258,6 +378,19 @@ export function listAllWatchSubscriptions() {
   }
 }
 
+export function listWatchUserIds() {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT DISTINCT user_id AS userId
+      FROM watchlist
+      ORDER BY user_id ASC
+    `).all().map((row) => row.userId);
+  } finally {
+    db.close();
+  }
+}
+
 export function getWatchSubscriptionById(id) {
   const db = openDatabase();
   try {
@@ -352,6 +485,30 @@ export function recordWatchNotification(userId, deal, notifiedAt = new Date().to
       toNumber(deal.savings),
       notifiedAt,
     );
+  } finally {
+    db.close();
+  }
+}
+
+export function hasRecentAppNotification(key, maxAgeMs, checkedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    const row = db.prepare("SELECT sent_at AS sentAt FROM app_notifications WHERE key = ?").get(key);
+    if (!row) return false;
+    return new Date(row.sentAt).getTime() >= new Date(checkedAt).getTime() - maxAgeMs;
+  } finally {
+    db.close();
+  }
+}
+
+export function recordAppNotification(key, sentAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT INTO app_notifications (key, sent_at)
+      VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET sent_at = excluded.sent_at
+    `).run(key, sentAt);
   } finally {
     db.close();
   }

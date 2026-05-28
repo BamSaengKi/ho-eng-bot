@@ -11,7 +11,10 @@ import { handleHelpMessage } from "./help.js";
 import {
   getDealHistory,
   getGameKey,
+  hasRecentAppNotification,
   hasExpiryNotification,
+  listWatchUserIds,
+  recordAppNotification,
   recordDealHistories,
   recordExpiryNotification,
 } from "./history.js";
@@ -53,6 +56,7 @@ const config = {
   itadShopIds: process.env.ITAD_SHOP_IDS || "",
   itadShopNames: process.env.ITAD_SHOPS || "",
   itadDailyScanLimit: Number(process.env.ITAD_DAILY_SCAN_LIMIT || 2500),
+  watchSetupReminderDays: Number(process.env.WATCH_SETUP_REMINDER_DAYS || 14),
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -447,6 +451,48 @@ async function postScheduledNotifications(client) {
   } catch (error) {
     console.error("[error] Scheduled watch post failed:", error);
   }
+
+  try {
+    await postWatchSetupReminder(client);
+  } catch (error) {
+    console.error("[error] Scheduled watch setup reminder failed:", error);
+  }
+}
+
+async function postWatchSetupReminder(client) {
+  if (!Number.isFinite(config.watchSetupReminderDays) || config.watchSetupReminderDays <= 0) return 0;
+
+  const reminderKey = `watch-setup-reminder:${config.channelId}`;
+  const intervalMs = config.watchSetupReminderDays * 24 * 60 * 60 * 1000;
+  if (hasRecentAppNotification(reminderKey, intervalMs)) return 0;
+
+  const channel = await client.channels.fetch(config.channelId);
+  if (!channel?.isTextBased() || !channel.guild) return 0;
+
+  let members;
+  try {
+    members = await channel.guild.members.fetch();
+  } catch (error) {
+    console.warn(`[warn] Cannot fetch guild members for watch setup reminder: ${error.message}`);
+    return 0;
+  }
+
+  const watchUserIds = new Set(listWatchUserIds());
+  const emptyWatchMembers = members.filter((member) =>
+    !member.user.bot && !watchUserIds.has(member.id)
+  );
+  if (emptyWatchMembers.size === 0) return 0;
+
+  await channel.send({
+    content: [
+      "아직 개인 관심 게임을 등록하지 않은 분들은 Steam 찜목록을 가져와보세요.",
+      "`/steam profile:Steam프로필주소`",
+      "찜목록을 watch-list에 채우면 관심 게임 할인 알림을 받을 수 있습니다.",
+    ].join("\n"),
+  });
+  recordAppNotification(reminderKey);
+  console.log(`[info] Posted watch setup reminder for ${emptyWatchMembers.size} member(s) without watch-list.`);
+  return emptyWatchMembers.size;
 }
 
 async function main() {
@@ -461,6 +507,7 @@ async function main() {
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.MessageContent,
     ],

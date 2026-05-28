@@ -26,10 +26,6 @@ function getProbeDeal(watch, result) {
   };
 }
 
-function isSteamDeal(deal) {
-  return String(deal.storeID) === "1" || String(deal.storeName ?? "").toLowerCase() === "steam";
-}
-
 async function enrichCandidate(candidate, watch) {
   const steamAppId = candidate.deal.steamAppID ?? watch.steamAppId;
   if (!steamAppId) return candidate;
@@ -61,10 +57,12 @@ async function collectCandidates(watch) {
   const result = await findCurrentDealFromStoredGame(watch, config);
   if (result) candidates.push(result);
 
-  const hasSteamCandidate = candidates.some((candidate) => isSteamDeal(candidate.deal));
+  const seenStoreIds = new Set(candidates.map((candidate) => String(candidate.deal.storeID ?? "")));
   const itadItems = result?.allDeals ?? await fetchItadCurrentDeals(getProbeDeal(watch, result), config);
   for (const item of itadItems) {
-    if (hasSteamCandidate && isSteamDeal(item.deal)) continue;
+    const storeId = String(item.deal.storeID ?? "");
+    if (seenStoreIds.has(storeId)) continue;
+    seenStoreIds.add(storeId);
     candidates.push({
       deal: item.deal,
       steamDetails: result?.steamDetails ?? null,

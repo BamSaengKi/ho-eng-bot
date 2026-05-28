@@ -1,4 +1,10 @@
-import { AttachmentBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  AttachmentBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} from "discord.js";
+import { randomUUID } from "node:crypto";
 import { fetchSteamAppDetails, fetchSteamAppReviews, fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { buildDealEmbed } from "./discord.js";
@@ -11,18 +17,11 @@ import {
   recordDealLookupHistory,
   recordExpiryNotification,
   recordWatchNotification,
+  saveWatchShareContext,
 } from "./history.js";
 import { fetchItadCurrentDeals, fetchItadDealExpiry, isItadExpiryToday } from "./itad.js";
 import { getSteamRegionOptions } from "./region.js";
 import { findCurrentDealFromStoredGame } from "./search.js";
-
-function uniqueValues(values) {
-  return [...new Set(values.filter(Boolean))];
-}
-
-function isSteamDeal(deal) {
-  return String(deal.storeID) === "1" || String(deal.storeName ?? "").toLowerCase() === "steam";
-}
 
 function createWatchProbeDeal(watch, result) {
   return result?.deal ?? {
@@ -73,10 +72,12 @@ async function collectWatchDealCandidates(watch, config) {
 
   const probeDeal = createWatchProbeDeal(watch, result);
   const itadItems = result?.allDeals ?? await fetchItadCurrentDeals(probeDeal, config);
-  const hasSteamCandidate = candidates.some((candidate) => isSteamDeal(candidate.deal));
+  const seenStoreIds = new Set(candidates.map((candidate) => String(candidate.deal.storeID ?? "")));
 
   for (const item of itadItems) {
-    if (hasSteamCandidate && isSteamDeal(item.deal)) continue;
+    const storeId = String(item.deal.storeID ?? "");
+    if (seenStoreIds.has(storeId)) continue;
+    seenStoreIds.add(storeId);
     candidates.push({
       deal: item.deal,
       steamDetails: result?.steamDetails ?? null,
@@ -103,18 +104,22 @@ async function collectWatchDealCandidates(watch, config) {
 }
 
 function formatDealContent(group) {
-  const mentions = uniqueValues(group.watchers.map((watcher) => `<@${watcher.userId}>`));
   return [
     group.expiryReminder ? "**관심 게임 할인 종료 알림**" : "**관심 게임 할인 알림**",
     `watch-list에 등록된 게임입니다: **${group.deal.title}**`,
     group.expiryReminder ? "오늘 할인 종료 예정입니다." : "",
-    mentions.length > 0 ? `대상: ${mentions.join(" ")}` : "",
   ].filter(Boolean).join("\n");
 }
 
-function formatThreadName(group) {
-  const title = `${group.deal.title} 할인 정보`;
-  return title.length > 100 ? title.slice(0, 100) : title;
+const WATCH_SHARE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+
+function buildWatchShareButton(token) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`watch_share:${token}`)
+      .setLabel("공유하고 스레드 만들기")
+      .setStyle(ButtonStyle.Primary),
+  );
 }
 
 export async function postWatchDeals(client, config) {
@@ -122,11 +127,6 @@ export async function postWatchDeals(client, config) {
   if (watches.length === 0) {
     console.log("[info] No personal watch subscriptions.");
     return;
-  }
-
-  const channel = await client.channels.fetch(config.channelId);
-  if (!channel?.isTextBased()) {
-    throw new Error("DISCORD_CHANNEL_ID is not a text channel the bot can access.");
   }
 
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
@@ -167,10 +167,6 @@ export async function postWatchDeals(client, config) {
           steamDetails: candidate.steamDetails,
         });
 
-        const member = "guild" in channel
-          ? await channel.guild.members.fetch(watch.userId).catch(() => null)
-          : null;
-        const displayName = member?.displayName ?? "해당 사용자";
         const groupKey = `${getGameKey(candidate.deal)}:${candidate.deal.storeID}`;
         const group = groupedDeals.get(groupKey) ?? {
           deal: candidate.deal,
@@ -183,7 +179,8 @@ export async function postWatchDeals(client, config) {
         group.expiryReminder = group.expiryReminder || expiryReminder;
         group.watchers.push({
           userId: watch.userId,
-          displayName,
+          watchId: watch.id,
+          displayName: "회원님",
           deal: candidate.deal,
           expiryReminder,
           expiryAt: dealExpiry?.raw ?? null,
@@ -201,53 +198,54 @@ export async function postWatchDeals(client, config) {
     const history = getDealHistory(group.deal);
     const chart = await generateDiscountHistoryChartPng(history, group.deal.title);
     const historyImageName = "discount-history.png";
-    const files = chart
-      ? [new AttachmentBuilder(chart, { name: historyImageName })]
-      : [];
-    const watcherNames = uniqueValues(group.watchers.map((watcher) => watcher.displayName)).join(", ");
-    const watcherLabel = group.watchers.length > 1
-      ? `${watcherNames}님들이 관심 게임으로 등록한 할인 정보입니다.`
-      : `${watcherNames}님이 관심 게임으로 등록한 할인 정보입니다.`;
 
-    try {
-      const message = await channel.send({
-        content: formatDealContent(group),
-        embeds: [
-          buildDealEmbed(group.deal, group.steamDetails, "개인 관심 게임", usdToKrw, {
-            hasHistoryChart: Boolean(chart),
-            historyCount: history.length,
-            history,
-            dealExpiry: group.dealExpiry,
-            expiryReminder: group.expiryReminder,
-            historyImageName,
-            lookupLabel: `${config.region} 개인 관심 게임\n${watcherLabel}`,
-            footerText: group.expiryReminder ? "관심 게임 할인 종료 알림" : "관심 게임 할인 알림",
-          }),
-        ],
-        files,
-      });
-
+    for (const watcher of group.watchers) {
       try {
-        await message.startThread({
-          name: formatThreadName(group),
-          reason: "Watch deal thread",
+        const user = await client.users.fetch(watcher.userId);
+        const shareToken = randomUUID();
+        saveWatchShareContext({
+          token: shareToken,
+          userId: watcher.userId,
+          watchId: watcher.watchId,
+          title: group.deal.title,
+          storeId: group.deal.storeID,
+          deal: group.deal,
+          steamDetails: group.steamDetails,
+          dealExpiry: group.dealExpiry,
+          expiresAt: new Date(Date.now() + WATCH_SHARE_TTL_MS).toISOString(),
         });
-      } catch (error) {
-        console.warn(`[warn] Failed to create watch deal thread: ${error.message}`);
-      }
+        const messageFiles = chart
+          ? [new AttachmentBuilder(chart, { name: historyImageName })]
+          : [];
+        await user.send({
+          content: formatDealContent(group),
+          embeds: [
+            buildDealEmbed(group.deal, group.steamDetails, "개인 관심 게임", usdToKrw, {
+              hasHistoryChart: Boolean(chart),
+              historyCount: history.length,
+              history,
+              dealExpiry: group.dealExpiry,
+              expiryReminder: group.expiryReminder,
+              historyImageName,
+              lookupLabel: `${config.region} 개인 관심 게임\n${watcher.displayName}이 관심 게임으로 등록한 할인 정보입니다.`,
+              footerText: group.expiryReminder ? "관심 게임 할인 종료 알림" : "관심 게임 할인 알림",
+            }),
+          ],
+          files: messageFiles,
+          components: [buildWatchShareButton(shareToken)],
+        });
 
-      for (const watcher of group.watchers) {
         recordWatchNotification(watcher.userId, watcher.deal);
         if (watcher.expiryReminder && watcher.expiryAt) {
           recordExpiryNotification("watch", watcher.deal, watcher.expiryAt, watcher.userId);
           stats.expiryReminders += 1;
         }
         stats.sent += 1;
+        stats.cards += 1;
+      } catch (error) {
+        stats.failed += 1;
+        console.warn(`[warn] Watch DM send failed for ${watcher.userId}/${group.deal.title}: ${error.message}`);
       }
-      stats.cards += 1;
-    } catch (error) {
-      stats.failed += 1;
-      console.warn(`[warn] Watch deal send failed: ${error.message}`);
     }
   }
 
