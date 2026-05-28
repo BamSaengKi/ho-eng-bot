@@ -34,6 +34,7 @@ import {
 } from "./history.js";
 import { fetchItadDealExpiry } from "./itad.js";
 import { GAME_ALIASES } from "./query-normalizer.js";
+import { fetchSteamWishlist } from "./steam-wishlist.js";
 
 const SELECT_TTL_MS = 10 * 60 * 1000;
 const pendingDealSelections = new Map();
@@ -46,6 +47,14 @@ function getGameOption(interaction) {
 
 function getAliasOption(interaction) {
   return interaction.options.getString("alias", true).trim();
+}
+
+function getSteamProfileOption(interaction) {
+  return interaction.options.getString("profile", true).trim();
+}
+
+function getLimitOption(interaction, fallback = 50) {
+  return interaction.options.getInteger("limit") ?? fallback;
 }
 
 function canManageAliases(interaction) {
@@ -403,6 +412,55 @@ export async function handleWatchAddCommand(interaction) {
   });
 }
 
+export async function handleWatchImportSteamCommand(interaction) {
+  const steamProfileInput = getSteamProfileOption(interaction);
+  const limit = getLimitOption(interaction, 50);
+  await interaction.deferReply({ ephemeral: true });
+
+  let wishlist;
+  try {
+    wishlist = await fetchSteamWishlist(steamProfileInput);
+  } catch (error) {
+    await interaction.editReply({
+      content: [
+        "Steam 찜목록을 가져오지 못했습니다.",
+        error.message,
+        "프로필과 게임 정보 공개 설정을 확인해주세요. 닉네임이 아니라 Steam 프로필 URL 또는 커스텀 URL 이름을 넣어야 합니다.",
+      ].join("\n"),
+    });
+    return;
+  }
+
+  if (wishlist.items.length === 0) {
+    await interaction.editReply({
+      content: [
+        "가져올 Steam 찜목록 게임이 없습니다.",
+        "찜목록이 비어 있거나, 프로필/게임 정보가 비공개일 수 있습니다.",
+      ].join("\n"),
+    });
+    return;
+  }
+
+  const selectedItems = wishlist.items.slice(0, limit);
+  const saved = selectedItems.map((game) =>
+    addWatchSubscription(interaction.user.id, game, game.external),
+  );
+  const preview = saved.slice(0, 15).map((game, index) => `${index + 1}. ${game.title}`);
+  const omitted = saved.length > preview.length ? `\n외 ${saved.length - preview.length}개` : "";
+
+  await interaction.editReply({
+    content: [
+      `Steam 찜목록에서 개인 관심 게임 ${saved.length}개를 가져왔습니다.`,
+      `Steam 프로필: ${wishlist.profile.label}`,
+      "",
+      ...preview,
+      omitted,
+      "",
+      "이미 등록된 게임은 같은 항목으로 갱신했습니다.",
+    ].filter(Boolean).join("\n"),
+  });
+}
+
 export async function handleWatchListCommand(interaction) {
   const watches = listWatchSubscriptions(interaction.user.id);
   await interaction.reply({
@@ -494,6 +552,11 @@ export async function handleInteraction(interaction, config) {
 
     if (interaction.commandName === "watch-add") {
       await handleWatchAddCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "steam") {
+      await handleWatchImportSteamCommand(interaction);
       return;
     }
 

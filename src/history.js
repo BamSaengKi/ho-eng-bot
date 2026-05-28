@@ -128,6 +128,11 @@ function openDatabase() {
       created_at TEXT NOT NULL,
       expires_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS app_notifications (
+      key TEXT PRIMARY KEY,
+      sent_at TEXT NOT NULL
+    );
   `);
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
@@ -373,6 +378,19 @@ export function listAllWatchSubscriptions() {
   }
 }
 
+export function listWatchUserIds() {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT DISTINCT user_id AS userId
+      FROM watchlist
+      ORDER BY user_id ASC
+    `).all().map((row) => row.userId);
+  } finally {
+    db.close();
+  }
+}
+
 export function getWatchSubscriptionById(id) {
   const db = openDatabase();
   try {
@@ -467,6 +485,30 @@ export function recordWatchNotification(userId, deal, notifiedAt = new Date().to
       toNumber(deal.savings),
       notifiedAt,
     );
+  } finally {
+    db.close();
+  }
+}
+
+export function hasRecentAppNotification(key, maxAgeMs, checkedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    const row = db.prepare("SELECT sent_at AS sentAt FROM app_notifications WHERE key = ?").get(key);
+    if (!row) return false;
+    return new Date(row.sentAt).getTime() >= new Date(checkedAt).getTime() - maxAgeMs;
+  } finally {
+    db.close();
+  }
+}
+
+export function recordAppNotification(key, sentAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT INTO app_notifications (key, sent_at)
+      VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET sent_at = excluded.sent_at
+    `).run(key, sentAt);
   } finally {
     db.close();
   }

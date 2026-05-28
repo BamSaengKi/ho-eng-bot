@@ -56,6 +56,23 @@ export const slashCommands = [
         .setRequired(true),
     ),
   new SlashCommandBuilder()
+    .setName("steam")
+    .setDescription("공개 Steam 찜목록을 개인 관심 게임에 가져옵니다.")
+    .addStringOption((option) =>
+      option
+        .setName("profile")
+        .setDescription("Steam 프로필 URL 또는 커스텀 URL 이름")
+        .setRequired(true),
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("limit")
+        .setDescription("가져올 최대 개수")
+        .setMinValue(1)
+        .setMaxValue(100)
+        .setRequired(false),
+    ),
+  new SlashCommandBuilder()
     .setName("watch-list")
     .setDescription("내 개인 관심 게임 목록을 보여줍니다."),
   new SlashCommandBuilder()
