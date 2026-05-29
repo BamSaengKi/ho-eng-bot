@@ -56,7 +56,7 @@ const config = {
   itadShopIds: process.env.ITAD_SHOP_IDS || "",
   itadShopNames: process.env.ITAD_SHOPS || "",
   itadDailyScanLimit: Number(process.env.ITAD_DAILY_SCAN_LIMIT || 2500),
-  watchSetupReminderDays: Number(process.env.WATCH_SETUP_REMINDER_DAYS || 14),
+  watchSetupReminderDays: Number(process.env.WATCH_SETUP_REMINDER_DAYS || 0),
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -504,14 +504,16 @@ async function main() {
     return;
   }
 
-  const client = new Client({
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-    ],
-  });
+  const intents = [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ];
+  if (config.watchSetupReminderDays > 0) {
+    intents.push(GatewayIntentBits.GuildMembers);
+  }
+
+  const client = new Client({ intents });
 
   client.once(Events.ClientReady, async () => {
     console.log(`[info] Logged in as ${client.user.tag}`);
