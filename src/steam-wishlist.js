@@ -118,29 +118,37 @@ async function fetchSteamAppDetailsMap(appIds) {
   const uniqueIds = [...new Set(appIds.map(String).filter(Boolean))];
   if (uniqueIds.length === 0) return new Map();
 
-  const url = new URL(STEAM_APPDETAILS_API);
-  url.searchParams.set("appids", uniqueIds.join(","));
-  url.searchParams.set("filters", "basic");
-  url.searchParams.set("cc", "KR");
-  url.searchParams.set("l", "korean");
-
-  const response = await fetch(url, {
-    headers: {
-      "accept": "application/json",
-      "user-agent": "sale-pad-discord-bot/0.1",
-    },
-  });
-
-  if (!response.ok) return new Map();
-
-  const data = await readJsonResponse(response);
   const details = new Map();
-  for (const appId of uniqueIds) {
-    const payload = data?.[appId];
-    if (payload?.success && payload.data?.name) {
-      details.set(appId, payload.data);
+  const concurrency = 5;
+  for (let index = 0; index < uniqueIds.length; index += concurrency) {
+    const chunk = uniqueIds.slice(index, index + concurrency);
+    const results = await Promise.all(chunk.map(async (appId) => {
+      const url = new URL(STEAM_APPDETAILS_API);
+      url.searchParams.set("appids", appId);
+      url.searchParams.set("filters", "basic");
+      url.searchParams.set("cc", "KR");
+      url.searchParams.set("l", "korean");
+
+      const response = await fetch(url, {
+        headers: {
+          "accept": "application/json",
+          "user-agent": "sale-pad-discord-bot/0.1",
+        },
+      });
+      if (!response.ok) return null;
+
+      const data = await readJsonResponse(response);
+      const payload = data?.[appId];
+      return payload?.success && payload.data?.name
+        ? [appId, payload.data]
+        : null;
+    }));
+
+    for (const result of results) {
+      if (result) details.set(result[0], result[1]);
     }
   }
+
   return details;
 }
 
