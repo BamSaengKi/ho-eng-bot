@@ -1,15 +1,27 @@
 import "dotenv/config";
-import { Client, Events, GatewayIntentBits, REST, Routes } from "discord.js";
+import { REST, Routes } from "discord.js";
 import { commandPayloads } from "./commands.js";
 
 const token = process.env.DISCORD_TOKEN;
 const channelId = process.env.DISCORD_CHANNEL_ID;
+const rest = new REST({ version: "10" }).setToken(token);
 
 const missing = [];
 if (!token) missing.push("DISCORD_TOKEN");
 
 if (missing.length > 0) {
   throw new Error(`Missing required env vars: ${missing.join(", ")}`);
+}
+
+function inferClientIdFromToken(value) {
+  const [encodedClientId] = String(value ?? "").split(".");
+  if (!encodedClientId) return null;
+
+  try {
+    return Buffer.from(encodedClientId, "base64url").toString("utf8");
+  } catch {
+    return null;
+  }
 }
 
 function explainDiscordAccessError(error, context) {
@@ -32,46 +44,34 @@ function explainDiscordAccessError(error, context) {
 }
 
 async function inferRegistrationTarget() {
-  if (process.env.DISCORD_CLIENT_ID && process.env.DISCORD_GUILD_ID) {
-    return {
-      clientId: process.env.DISCORD_CLIENT_ID,
-      guildId: process.env.DISCORD_GUILD_ID,
-    };
+  const clientId = process.env.DISCORD_CLIENT_ID || inferClientIdFromToken(token);
+  const guildId = process.env.DISCORD_GUILD_ID;
+  if (clientId && guildId) return { clientId, guildId };
+
+  if (!clientId) {
+    throw new Error("DISCORD_CLIENT_ID is required because the bot client id could not be inferred from DISCORD_TOKEN.");
   }
 
   if (!channelId) {
-    throw new Error("DISCORD_CHANNEL_ID is required when DISCORD_CLIENT_ID or DISCORD_GUILD_ID is not set.");
+    throw new Error("DISCORD_CHANNEL_ID is required when DISCORD_GUILD_ID is not set.");
   }
 
-  const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
-  });
+  try {
+    const channel = await rest.get(Routes.channel(channelId));
+    if (!channel?.guild_id) {
+      throw new Error("DISCORD_CHANNEL_ID does not point to a guild channel.");
+    }
 
-  return new Promise((resolve, reject) => {
-    client.once(Events.ClientReady, async () => {
-      try {
-        const channel = await client.channels.fetch(channelId);
-        if (!channel?.guildId) {
-          throw new Error("DISCORD_CHANNEL_ID does not point to a guild channel.");
-        }
-
-        resolve({
-          clientId: client.user.id,
-          guildId: channel.guildId,
-        });
-      } catch (error) {
-        reject(explainDiscordAccessError(error, `fetching DISCORD_CHANNEL_ID=${channelId}`));
-      } finally {
-        await client.destroy();
-      }
-    });
-
-    client.login(token).catch(reject);
-  });
+    return {
+      clientId,
+      guildId: channel.guild_id,
+    };
+  } catch (error) {
+    throw explainDiscordAccessError(error, `fetching DISCORD_CHANNEL_ID=${channelId}`);
+  }
 }
 
 const { clientId, guildId } = await inferRegistrationTarget();
-const rest = new REST({ version: "10" }).setToken(token);
 
 try {
   await rest.put(
