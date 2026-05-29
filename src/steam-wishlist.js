@@ -2,6 +2,7 @@ const STEAM_ID_PATTERN = /\b7656119\d{10}\b/;
 const CUSTOM_PROFILE_PATTERN = /^[a-zA-Z0-9_-]{2,64}$/;
 const STEAM_WISHLIST_API = "https://api.steampowered.com/IWishlistService/GetWishlist/v1/";
 const STEAM_APPDETAILS_API = "https://store.steampowered.com/api/appdetails";
+const STEAM_APP_PAGE = "https://store.steampowered.com/app";
 
 function parseSteamProfile(input) {
   const value = String(input ?? "").trim();
@@ -139,9 +140,12 @@ async function fetchSteamAppDetailsMap(appIds) {
 
       const data = await readJsonResponse(response);
       const payload = data?.[appId];
-      return payload?.success && payload.data?.name
-        ? [appId, payload.data]
-        : null;
+      if (payload?.success && payload.data?.name) {
+        return [appId, payload.data];
+      }
+
+      const pageName = await fetchSteamAppNameFromStorePage(appId).catch(() => null);
+      return pageName ? [appId, { name: pageName }] : null;
     }));
 
     for (const result of results) {
@@ -152,10 +156,41 @@ async function fetchSteamAppDetailsMap(appIds) {
   return details;
 }
 
+function decodeHtmlEntities(value) {
+  return String(value ?? "")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+async function fetchSteamAppNameFromStorePage(appId) {
+  const url = new URL(`${STEAM_APP_PAGE}/${appId}/`);
+  url.searchParams.set("cc", "KR");
+  url.searchParams.set("l", "korean");
+
+  const response = await fetch(url, {
+    headers: {
+      "accept": "text/html,*/*",
+      "user-agent": "Mozilla/5.0 sale-pad-discord-bot/0.1",
+    },
+  });
+  if (!response.ok) return null;
+
+  const html = await response.text();
+  const title = html.match(/<div[^>]+class="apphub_AppName"[^>]*>([^<]+)<\/div>/)?.[1] ??
+    html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/)?.[1];
+
+  return title ? decodeHtmlEntities(title).trim() : null;
+}
+
 function normalizeWishlistItem(appId, item, details) {
+  if (!details?.name) return null;
+
   return {
-    external: details?.name ?? `Steam App ${appId}`,
-    title: details?.name ?? `Steam App ${appId}`,
+    external: details.name,
+    title: details.name,
     steamAppID: String(appId),
     gameID: null,
     itadId: null,
@@ -177,6 +212,7 @@ export async function fetchSteamWishlist(input, options = {}) {
   const items = wishlistItems
     .filter((item) => item?.appid)
     .map((item) => normalizeWishlistItem(item.appid, item, detailsByAppId.get(String(item.appid))))
+    .filter(Boolean)
     .sort((a, b) => {
       const priorityDiff = a.priority - b.priority;
       if (priorityDiff !== 0) return priorityDiff;
@@ -186,5 +222,6 @@ export async function fetchSteamWishlist(input, options = {}) {
   return {
     profile: resolvedProfile,
     items,
+    skippedCount: wishlistItems.length - items.length,
   };
 }

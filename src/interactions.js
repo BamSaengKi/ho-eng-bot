@@ -447,6 +447,9 @@ export async function handleWatchImportSteamCommand(interaction) {
   );
   const preview = saved.slice(0, 15).map((game, index) => `${index + 1}. ${game.title}`);
   const omitted = saved.length > preview.length ? `\n외 ${saved.length - preview.length}개` : "";
+  const skipped = wishlist.skippedCount > 0
+    ? `\n이름을 확인하지 못한 ${wishlist.skippedCount}개 항목은 건너뛰었습니다.`
+    : "";
 
   await interaction.editReply({
     content: [
@@ -455,6 +458,7 @@ export async function handleWatchImportSteamCommand(interaction) {
       "",
       ...preview,
       omitted,
+      skipped,
       "",
       "이미 등록된 게임은 같은 항목으로 갱신했습니다.",
     ].filter(Boolean).join("\n"),
