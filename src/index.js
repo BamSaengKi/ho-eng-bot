@@ -57,6 +57,7 @@ const config = {
   itadShopNames: process.env.ITAD_SHOPS || "",
   itadDailyScanLimit: Number(process.env.ITAD_DAILY_SCAN_LIMIT || 2500),
   watchSetupReminderDays: Number(process.env.WATCH_SETUP_REMINDER_DAYS || 0),
+  enableGuildMembersIntent: process.env.ENABLE_GUILD_MEMBERS_INTENT === "true",
   once: process.argv.includes("--once"),
   dryRun: process.argv.includes("--dry-run"),
   includeSent: process.argv.includes("--include-sent"),
@@ -461,6 +462,10 @@ async function postScheduledNotifications(client) {
 
 async function postWatchSetupReminder(client) {
   if (!Number.isFinite(config.watchSetupReminderDays) || config.watchSetupReminderDays <= 0) return 0;
+  if (!config.enableGuildMembersIntent) {
+    console.warn("[warn] Watch setup reminder skipped: ENABLE_GUILD_MEMBERS_INTENT=true is required.");
+    return 0;
+  }
 
   const reminderKey = `watch-setup-reminder:${config.channelId}`;
   const intervalMs = config.watchSetupReminderDays * 24 * 60 * 60 * 1000;
@@ -509,7 +514,7 @@ async function main() {
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
   ];
-  if (config.watchSetupReminderDays > 0) {
+  if (config.watchSetupReminderDays > 0 && config.enableGuildMembersIntent) {
     intents.push(GatewayIntentBits.GuildMembers);
   }
 
