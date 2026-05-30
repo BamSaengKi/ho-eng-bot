@@ -91,6 +91,12 @@ function openDatabase() {
       UNIQUE(user_id, game_key)
     );
 
+    CREATE TABLE IF NOT EXISTS watch_settings (
+      user_id TEXT PRIMARY KEY,
+      min_discount REAL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS watch_notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT NOT NULL,
@@ -137,6 +143,16 @@ function openDatabase() {
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
     db.exec("ALTER TABLE deal_history ADD COLUMN price_currency TEXT NOT NULL DEFAULT 'USD'");
+  }
+  const watchSettingColumns = db.prepare("PRAGMA table_info(watch_settings)").all();
+  if (!watchSettingColumns.some((column) => column.name === "store_filter")) {
+    db.exec("ALTER TABLE watch_settings ADD COLUMN store_filter TEXT");
+  }
+  if (!watchSettingColumns.some((column) => column.name === "steam_profile_input")) {
+    db.exec("ALTER TABLE watch_settings ADD COLUMN steam_profile_input TEXT");
+  }
+  if (!watchSettingColumns.some((column) => column.name === "steam_profile_label")) {
+    db.exec("ALTER TABLE watch_settings ADD COLUMN steam_profile_label TEXT");
   }
   return db;
 }
@@ -431,6 +447,142 @@ export function removeWatchSubscription(userId, query) {
   }
 }
 
+export function removeWatchSubscriptionById(userId, id) {
+  const db = openDatabase();
+  try {
+    const watch = db.prepare(`
+      SELECT
+        id,
+        user_id AS userId,
+        game_key AS gameKey,
+        query,
+        title,
+        steam_app_id AS steamAppId,
+        game_id AS gameId,
+        created_at AS createdAt
+      FROM watchlist
+      WHERE user_id = ? AND id = ?
+    `).get(userId, id);
+    if (!watch) return null;
+
+    db.prepare("DELETE FROM watchlist WHERE user_id = ? AND id = ?").run(userId, id);
+    return watch;
+  } finally {
+    db.close();
+  }
+}
+
+export function clearWatchSubscriptions(userId) {
+  const db = openDatabase();
+  try {
+    const result = db.prepare("DELETE FROM watchlist WHERE user_id = ?").run(userId);
+    return result.changes;
+  } finally {
+    db.close();
+  }
+}
+
+export function getWatchSettings(userId) {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT
+        user_id AS userId,
+        min_discount AS minDiscount,
+        store_filter AS storeFilter,
+        steam_profile_input AS steamProfileInput,
+        steam_profile_label AS steamProfileLabel,
+        updated_at AS updatedAt
+      FROM watch_settings
+      WHERE user_id = ?
+    `).get(userId) ?? {
+      userId,
+      minDiscount: null,
+      storeFilter: null,
+      steamProfileInput: null,
+      steamProfileLabel: null,
+      updatedAt: null,
+    };
+  } finally {
+    db.close();
+  }
+}
+
+export function upsertWatchSettings(userId, settings, updatedAt = new Date().toISOString()) {
+  const current = getWatchSettings(userId);
+  const nextMinDiscount = settings.minDiscount === undefined
+    ? current.minDiscount
+    : settings.minDiscount;
+  const nextStoreFilter = settings.storeFilter === undefined
+    ? current.storeFilter
+    : settings.storeFilter;
+  const nextSteamProfileInput = settings.steamProfileInput === undefined
+    ? current.steamProfileInput
+    : settings.steamProfileInput;
+  const nextSteamProfileLabel = settings.steamProfileLabel === undefined
+    ? current.steamProfileLabel
+    : settings.steamProfileLabel;
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT INTO watch_settings (
+        user_id,
+        min_discount,
+        store_filter,
+        steam_profile_input,
+        steam_profile_label,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        min_discount = excluded.min_discount,
+        store_filter = excluded.store_filter,
+        steam_profile_input = excluded.steam_profile_input,
+        steam_profile_label = excluded.steam_profile_label,
+        updated_at = excluded.updated_at
+    `).run(
+      userId,
+      nextMinDiscount,
+      nextStoreFilter,
+      nextSteamProfileInput,
+      nextSteamProfileLabel,
+      updatedAt,
+    );
+    return getWatchSettings(userId);
+  } finally {
+    db.close();
+  }
+}
+
+export function cleanupWatchSubscriptions(userId) {
+  const watches = listWatchSubscriptions(userId);
+  const seen = new Set();
+  const deleteIds = [];
+  for (const watch of watches) {
+    const normalizedTitle = normalizeAlias(watch.title);
+    const key = watch.steamAppId ? `steam:${watch.steamAppId}` : normalizedTitle;
+    if (normalizedTitle.startsWith("steam app ") || seen.has(key)) {
+      deleteIds.push(watch.id);
+      continue;
+    }
+    seen.add(key);
+  }
+
+  if (deleteIds.length === 0) return 0;
+
+  const db = openDatabase();
+  try {
+    const statement = db.prepare("DELETE FROM watchlist WHERE user_id = ? AND id = ?");
+    let removed = 0;
+    for (const id of deleteIds) {
+      removed += statement.run(userId, id).changes;
+    }
+    return removed;
+  } finally {
+    db.close();
+  }
+}
+
 export function hasRecentWatchNotification(userId, deal, maxAgeMs = ONE_WEEK_MS, checkedAt = new Date().toISOString()) {
   const db = openDatabase();
   try {
@@ -509,6 +661,32 @@ export function recordAppNotification(key, sentAt = new Date().toISOString()) {
       VALUES (?, ?)
       ON CONFLICT(key) DO UPDATE SET sent_at = excluded.sent_at
     `).run(key, sentAt);
+  } finally {
+    db.close();
+  }
+}
+
+export function getAppNotification(key) {
+  const db = openDatabase();
+  try {
+    return db.prepare("SELECT key, sent_at AS sentAt FROM app_notifications WHERE key = ?").get(key) ?? null;
+  } finally {
+    db.close();
+  }
+}
+
+export function getStorageSummary() {
+  const db = openDatabase();
+  try {
+    return {
+      dbPath: DB_PATH,
+      games: db.prepare("SELECT COUNT(*) AS count FROM games").get().count,
+      dealHistory: db.prepare("SELECT COUNT(*) AS count FROM deal_history").get().count,
+      aliases: db.prepare("SELECT COUNT(*) AS count FROM aliases").get().count,
+      watchlist: db.prepare("SELECT COUNT(*) AS count FROM watchlist").get().count,
+      watchUsers: db.prepare("SELECT COUNT(DISTINCT user_id) AS count FROM watchlist").get().count,
+      watchSettings: db.prepare("SELECT COUNT(*) AS count FROM watch_settings").get().count,
+    };
   } finally {
     db.close();
   }

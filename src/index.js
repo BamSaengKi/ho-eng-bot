@@ -1,6 +1,6 @@
 import "dotenv/config";
 import cron from "node-cron";
-import { AttachmentBuilder, Client, Events, GatewayIntentBits } from "discord.js";
+import { AttachmentBuilder, Client, EmbedBuilder, Events, GatewayIntentBits } from "discord.js";
 import { resolve } from "node:path";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
@@ -264,6 +264,42 @@ function groupDisplayDeals(items) {
     });
 }
 
+function buildDailySummaryEmbed(deals, historyItems) {
+  const seriesCount = deals.filter((item) => item.type === "series").length;
+  const singleCount = deals.length - seriesCount;
+  const relatedCount = deals.reduce((total, item) => {
+    if (item.type === "series") return total + (item.relatedContent?.length ?? 0);
+    return total + (item.relatedEditions?.length ?? 0);
+  }, 0);
+
+  return new EmbedBuilder()
+    .setColor(0x0f8f7f)
+    .setTitle("오늘의 할인 정보")
+    .setDescription(`${config.region} 기준 ${config.minDiscount}% 이상 할인 중인 AAA급 게임을 찾았습니다.`)
+    .addFields(
+      {
+        name: "요약",
+        value: [
+          `표시 카드: ${deals.length}개`,
+          `시리즈 카드: ${seriesCount}개`,
+          `개별 카드: ${singleCount}개`,
+          `DLC/에디션 관련 할인: ${relatedCount}개`,
+        ].join("\n"),
+        inline: true,
+      },
+      {
+        name: "저장",
+        value: [
+          `조건 매칭 할인: ${historyItems.length}개`,
+          "신규 할인, 오늘 종료, 관심 게임 알림은 각각 카드에서 확인할 수 있습니다.",
+        ].join("\n"),
+        inline: true,
+      },
+    )
+    .setFooter({ text: "오늘의 할인 정보" })
+    .setTimestamp(new Date());
+}
+
 async function collectAaaDeals() {
   const sentDeals = await readJson(SENT_DEALS_PATH, { dealIds: [] });
   const sentDealIds = new Set(sentDeals.dealIds ?? []);
@@ -347,7 +383,7 @@ async function postDailyDeals(client) {
   }
 
   await channel.send({
-    content: `오늘의 AAA급 게임 할인 ${deals.length}개를 찾았습니다. (${config.region} 기준, ${config.minDiscount}% 이상 할인)`,
+    embeds: [buildDailySummaryEmbed(deals, historyItems)],
   });
 
   for (const item of deals) {
@@ -458,6 +494,8 @@ async function postScheduledNotifications(client) {
   } catch (error) {
     console.error("[error] Scheduled watch setup reminder failed:", error);
   }
+
+  recordAppNotification("last-scheduled-run");
 }
 
 async function postWatchSetupReminder(client) {

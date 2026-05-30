@@ -22,14 +22,21 @@ import {
   getDealHistoryByGameKey,
   deleteWatchShareContext,
   getWatchShareContext,
+  getWatchSettings,
+  getStorageSummary,
+  getAppNotification,
   getWatchSubscriptionById,
   listAliases,
   listWatchSubscriptions,
   normalizeAlias,
   recordDealLookupHistory,
   addWatchSubscription,
+  cleanupWatchSubscriptions,
+  clearWatchSubscriptions,
   removeAlias,
   removeWatchSubscription,
+  removeWatchSubscriptionById,
+  upsertWatchSettings,
   upsertAlias,
 } from "./history.js";
 import { fetchItadDealExpiry } from "./itad.js";
@@ -40,9 +47,14 @@ const SELECT_TTL_MS = 10 * 60 * 1000;
 const pendingDealSelections = new Map();
 const pendingDealShares = new Map();
 const pendingWatchSelections = new Map();
+const pendingWatchRemovals = new Map();
 
 function getGameOption(interaction) {
   return interaction.options.getString("game", true).trim();
+}
+
+function getOptionalGameOption(interaction) {
+  return interaction.options.getString("game")?.trim() ?? "";
 }
 
 function getAliasOption(interaction) {
@@ -57,6 +69,14 @@ function getLimitOption(interaction, fallback = 50) {
   return interaction.options.getInteger("limit") ?? fallback;
 }
 
+function getMinDiscountOption(interaction) {
+  return interaction.options.getInteger("min_discount");
+}
+
+function getStoresOption(interaction) {
+  return interaction.options.getString("stores")?.trim() ?? "";
+}
+
 function canManageAliases(interaction) {
   return Boolean(interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild));
 }
@@ -66,6 +86,16 @@ async function requireAliasPermission(interaction) {
 
   await interaction.reply({
     content: "별칭 삭제는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.",
+    ephemeral: true,
+  });
+  return false;
+}
+
+async function requireManageGuildPermission(interaction) {
+  if (canManageAliases(interaction)) return true;
+
+  await interaction.reply({
+    content: "이 명령어는 서버 관리 권한이 있는 사용자만 사용할 수 있습니다.",
     ephemeral: true,
   });
   return false;
@@ -102,6 +132,10 @@ function createWatchSelectionId(interaction) {
   return `watch_select:${interaction.id}`;
 }
 
+function createWatchRemoveSelectionId(interaction) {
+  return `watch_remove_select:${interaction.id}`;
+}
+
 function createShareId(interaction) {
   return `deal_share:${interaction.id}`;
 }
@@ -135,6 +169,9 @@ function cleanupSelections() {
   for (const [id, selection] of pendingWatchSelections.entries()) {
     if (selection.expiresAt <= now) pendingWatchSelections.delete(id);
   }
+  for (const [id, selection] of pendingWatchRemovals.entries()) {
+    if (selection.expiresAt <= now) pendingWatchRemovals.delete(id);
+  }
 }
 
 function buildSelectMenu(id, candidates, placeholder = "조회할 게임을 선택해주세요") {
@@ -160,6 +197,61 @@ function formatWatchList(watches) {
     "**내 개인 관심 게임**",
     ...watches.map((watch, index) => `${index + 1}. ${watch.title}`),
   ].join("\n");
+}
+
+function buildWatchRemoveSelectMenu(id, watches) {
+  const menu = new StringSelectMenuBuilder()
+    .setCustomId(id)
+    .setPlaceholder("삭제할 관심 게임을 선택해주세요")
+    .addOptions(
+      watches.slice(0, 25).map((watch) =>
+        new StringSelectMenuOptionBuilder()
+          .setLabel(truncate(watch.title, 100))
+          .setDescription(truncate(watch.steamAppId ? `Steam app ${watch.steamAppId}` : watch.gameKey, 100))
+          .setValue(String(watch.id)),
+      ),
+    );
+
+  return new ActionRowBuilder().addComponents(menu);
+}
+
+function normalizeStoreFilterInput(value) {
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (!raw || raw === "all" || raw === "전체") return null;
+  const aliases = new Map([
+    ["steam", "steam"],
+    ["스팀", "steam"],
+    ["epic", "epic"],
+    ["epic games", "epic"],
+    ["에픽", "epic"],
+    ["humble", "humble"],
+    ["humble store", "humble"],
+    ["험블", "humble"],
+    ["ubisoft", "ubisoft"],
+    ["uplay", "ubisoft"],
+    ["유비", "ubisoft"],
+    ["blizzard", "blizzard"],
+    ["블리자드", "blizzard"],
+  ]);
+  const stores = raw
+    .split(/[,\s]+/)
+    .map((store) => aliases.get(store) ?? store)
+    .filter(Boolean);
+  const allowed = new Set(["steam", "epic", "humble", "ubisoft", "blizzard"]);
+  const normalized = [...new Set(stores.filter((store) => allowed.has(store)))];
+  return normalized.length > 0 ? normalized.join(",") : null;
+}
+
+function formatStoreFilter(value) {
+  return value || "all";
+}
+
+function formatStatusTime(value) {
+  return value ? new Intl.DateTimeFormat("ko-KR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Seoul",
+  }).format(new Date(value)) : "기록 없음";
 }
 
 function buildShareButton(id) {
@@ -445,6 +537,10 @@ export async function handleWatchImportSteamCommand(interaction) {
   const saved = selectedItems.map((game) =>
     addWatchSubscription(interaction.user.id, game, game.external),
   );
+  upsertWatchSettings(interaction.user.id, {
+    steamProfileInput,
+    steamProfileLabel: wishlist.profile.label,
+  });
   const preview = saved.slice(0, 15).map((game, index) => `${index + 1}. ${game.title}`);
   const omitted = saved.length > preview.length ? `\n외 ${saved.length - preview.length}개` : "";
   const skipped = wishlist.skippedCount > 0
@@ -465,6 +561,52 @@ export async function handleWatchImportSteamCommand(interaction) {
   });
 }
 
+export async function handleWatchRefreshCommand(interaction) {
+  const settings = getWatchSettings(interaction.user.id);
+  if (!settings.steamProfileInput) {
+    await interaction.reply({
+      content: "`/steam profile:Steam프로필주소`로 먼저 Steam 찜목록을 가져와주세요.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const limit = getLimitOption(interaction, 50);
+  await interaction.deferReply({ ephemeral: true });
+  let wishlist;
+  try {
+    wishlist = await fetchSteamWishlist(settings.steamProfileInput);
+  } catch (error) {
+    await interaction.editReply([
+      "Steam 찜목록을 다시 가져오지 못했습니다.",
+      error.message,
+    ].join("\n"));
+    return;
+  }
+
+  const selectedItems = wishlist.items.slice(0, limit);
+  const saved = selectedItems.map((game) =>
+    addWatchSubscription(interaction.user.id, game, game.external),
+  );
+  upsertWatchSettings(interaction.user.id, {
+    steamProfileInput: settings.steamProfileInput,
+    steamProfileLabel: wishlist.profile.label,
+  });
+  const preview = saved.slice(0, 15).map((game, index) => `${index + 1}. ${game.title}`);
+  const omitted = saved.length > preview.length ? `\n외 ${saved.length - preview.length}개` : "";
+
+  await interaction.editReply({
+    content: [
+      `Steam 찜목록으로 개인 관심 게임 ${saved.length}개를 갱신했습니다.`,
+      `Steam 프로필: ${wishlist.profile.label}`,
+      "",
+      ...preview,
+      omitted,
+      wishlist.skippedCount > 0 ? `\n이름을 확인하지 못한 ${wishlist.skippedCount}개 항목은 건너뛰었습니다.` : "",
+    ].filter(Boolean).join("\n"),
+  });
+}
+
 export async function handleWatchListCommand(interaction) {
   const watches = listWatchSubscriptions(interaction.user.id);
   await interaction.reply({
@@ -474,13 +616,126 @@ export async function handleWatchListCommand(interaction) {
 }
 
 export async function handleWatchRemoveCommand(interaction) {
-  const query = getGameOption(interaction);
+  const query = getOptionalGameOption(interaction);
+  if (!query) {
+    const watches = listWatchSubscriptions(interaction.user.id);
+    if (watches.length === 0) {
+      await interaction.reply({
+        content: "삭제할 개인 관심 게임이 없습니다.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    cleanupSelections();
+    const selectionId = createWatchRemoveSelectionId(interaction);
+    pendingWatchRemovals.set(selectionId, {
+      userId: interaction.user.id,
+      expiresAt: Date.now() + SELECT_TTL_MS,
+    });
+
+    await interaction.reply({
+      content: "삭제할 개인 관심 게임을 선택해주세요.",
+      components: [buildWatchRemoveSelectMenu(selectionId, watches)],
+      ephemeral: true,
+    });
+    return;
+  }
+
   const removed = removeWatchSubscription(interaction.user.id, query);
 
   await interaction.reply({
     content: removed
       ? `개인 관심 게임에서 삭제했습니다: **${removed.title}**`
       : `"${query}"와 일치하는 개인 관심 게임을 찾지 못했습니다.`,
+    ephemeral: true,
+  });
+}
+
+export async function handleWatchClearCommand(interaction) {
+  const count = clearWatchSubscriptions(interaction.user.id);
+  await interaction.reply({
+    content: count > 0
+      ? `개인 관심 게임 ${count}개를 모두 삭제했습니다.`
+      : "삭제할 개인 관심 게임이 없습니다.",
+    ephemeral: true,
+  });
+}
+
+export async function handleWatchSettingCommand(interaction, config) {
+  const minDiscount = getMinDiscountOption(interaction);
+  if (minDiscount === null) {
+    const settings = getWatchSettings(interaction.user.id);
+    const activeMinDiscount = settings.minDiscount ?? config.minDiscount;
+    await interaction.reply({
+      content: [
+        `현재 개인 관심 게임 최소 할인율: **${Math.round(Number(activeMinDiscount))}%**`,
+        settings.minDiscount === null ? "개인 설정이 없어 서버 기본값을 사용 중입니다." : "개인 설정이 적용 중입니다.",
+      ].join("\n"),
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const saved = upsertWatchSettings(interaction.user.id, { minDiscount });
+  await interaction.reply({
+    content: `개인 관심 게임 최소 할인율을 **${Math.round(Number(saved.minDiscount))}%**로 설정했습니다.`,
+    ephemeral: true,
+  });
+}
+
+export async function handleWatchStoreCommand(interaction) {
+  const storesInput = getStoresOption(interaction);
+  const settings = getWatchSettings(interaction.user.id);
+  if (!storesInput) {
+    await interaction.reply({
+      content: `현재 개인 관심 게임 스토어 필터: **${formatStoreFilter(settings.storeFilter)}**`,
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const storeFilter = normalizeStoreFilterInput(storesInput);
+  if (storesInput.toLowerCase() !== "all" && !storeFilter) {
+    await interaction.reply({
+      content: "스토어는 `all` 또는 `steam,epic,humble,ubisoft,blizzard` 형식으로 입력해주세요.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const saved = upsertWatchSettings(interaction.user.id, { storeFilter });
+  await interaction.reply({
+    content: `개인 관심 게임 스토어 필터를 **${formatStoreFilter(saved.storeFilter)}**로 설정했습니다.`,
+    ephemeral: true,
+  });
+}
+
+export async function handleWatchCleanupCommand(interaction) {
+  const count = cleanupWatchSubscriptions(interaction.user.id);
+  await interaction.reply({
+    content: count > 0
+      ? `중복/오래된 개인 관심 게임 ${count}개를 정리했습니다.`
+      : "정리할 중복/오래된 개인 관심 게임이 없습니다.",
+    ephemeral: true,
+  });
+}
+
+export async function handleStatusCommand(interaction) {
+  if (!(await requireManageGuildPermission(interaction))) return;
+
+  const summary = getStorageSummary();
+  const lastScheduled = getAppNotification("last-scheduled-run");
+  await interaction.reply({
+    content: [
+      "**Sale Pad 상태**",
+      `DB: ${summary.dbPath}`,
+      `watch-list: ${summary.watchlist}개 / ${summary.watchUsers}명`,
+      `watch settings: ${summary.watchSettings}명`,
+      `deal history: ${summary.dealHistory}개`,
+      `aliases: ${summary.aliases}개`,
+      `last scheduled run: ${formatStatusTime(lastScheduled?.sentAt)}`,
+    ].join("\n"),
     ephemeral: true,
   });
 }
@@ -524,6 +779,11 @@ export async function handleInteraction(interaction, config) {
 
     if (interaction.isStringSelectMenu() && interaction.customId.startsWith("watch_select:")) {
       await handleWatchSelection(interaction);
+      return;
+    }
+
+    if (interaction.isStringSelectMenu() && interaction.customId.startsWith("watch_remove_select:")) {
+      await handleWatchRemoveSelection(interaction);
       return;
     }
 
@@ -571,6 +831,36 @@ export async function handleInteraction(interaction, config) {
 
     if (interaction.commandName === "watch-remove") {
       await handleWatchRemoveCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "watch-clear") {
+      await handleWatchClearCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "watch-refresh") {
+      await handleWatchRefreshCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "watch-store") {
+      await handleWatchStoreCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "watch-cleanup") {
+      await handleWatchCleanupCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "watch-setting") {
+      await handleWatchSettingCommand(interaction, config);
+      return;
+    }
+
+    if (interaction.commandName === "status") {
+      await handleStatusCommand(interaction);
     }
   } catch (error) {
     console.error(`[error] /${interaction.commandName} failed:`, error);
@@ -1047,6 +1337,40 @@ async function handleWatchSelection(interaction) {
       `개인 관심 게임에 등록했습니다: **${saved.title}**`,
       "매일 자동 조회에서 할인 조건에 맞으면 공지 채널에 알려드립니다.",
     ].join("\n"),
+    embeds: [],
+    files: [],
+    components: [],
+  });
+}
+
+async function handleWatchRemoveSelection(interaction) {
+  const selection = pendingWatchRemovals.get(interaction.customId);
+  if (!selection || selection.expiresAt <= Date.now()) {
+    pendingWatchRemovals.delete(interaction.customId);
+    await interaction.update({
+      content: "선택 시간이 만료되었습니다. `/watch-remove` 명령어로 다시 삭제해주세요.",
+      embeds: [],
+      files: [],
+      components: [],
+    });
+    return;
+  }
+
+  if (selection.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: "이 선택 메뉴는 명령어를 실행한 사용자만 사용할 수 있습니다.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const removed = removeWatchSubscriptionById(interaction.user.id, interaction.values[0]);
+  pendingWatchRemovals.delete(interaction.customId);
+
+  await interaction.update({
+    content: removed
+      ? `개인 관심 게임에서 삭제했습니다: **${removed.title}**`
+      : "선택한 개인 관심 게임을 찾지 못했습니다.",
     embeds: [],
     files: [],
     components: [],

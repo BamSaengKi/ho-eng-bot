@@ -81,9 +81,49 @@ export const slashCommands = [
     .addStringOption((option) =>
       option
         .setName("game")
-        .setDescription("삭제할 게임 이름")
-        .setRequired(true),
+        .setDescription("삭제할 게임 이름. 비워두면 선택 메뉴가 뜹니다.")
+        .setRequired(false),
     ),
+  new SlashCommandBuilder()
+    .setName("watch-clear")
+    .setDescription("내 개인 관심 게임 목록을 모두 삭제합니다."),
+  new SlashCommandBuilder()
+    .setName("watch-refresh")
+    .setDescription("마지막으로 가져온 Steam 찜목록으로 watch-list를 다시 갱신합니다.")
+    .addIntegerOption((option) =>
+      option
+        .setName("limit")
+        .setDescription("가져올 최대 개수")
+        .setMinValue(1)
+        .setMaxValue(100)
+        .setRequired(false),
+    ),
+  new SlashCommandBuilder()
+    .setName("watch-store")
+    .setDescription("개인 관심 게임 알림을 받을 스토어를 설정합니다.")
+    .addStringOption((option) =>
+      option
+        .setName("stores")
+        .setDescription("all 또는 steam,epic,humble,ubisoft,blizzard")
+        .setRequired(false),
+    ),
+  new SlashCommandBuilder()
+    .setName("watch-cleanup")
+    .setDescription("내 개인 관심 게임의 중복/오래된 항목을 정리합니다."),
+  new SlashCommandBuilder()
+    .setName("watch-setting")
+    .setDescription("개인 관심 게임 알림 설정을 변경합니다.")
+    .addIntegerOption((option) =>
+      option
+        .setName("min_discount")
+        .setDescription("관심 게임 알림을 받을 최소 할인율")
+        .setMinValue(1)
+        .setMaxValue(100)
+        .setRequired(false),
+    ),
+  new SlashCommandBuilder()
+    .setName("status")
+    .setDescription("봇 운영 상태를 확인합니다. 관리자 전용입니다."),
 ];
 
 export const commandPayloads = slashCommands.map((command) => command.toJSON());
