@@ -42,6 +42,8 @@ import {
 import { fetchItadDealExpiry } from "./itad.js";
 import { GAME_ALIASES } from "./query-normalizer.js";
 import { fetchSteamWishlist } from "./steam-wishlist.js";
+import { HELP_MESSAGE } from "./help.js";
+import { collectWatchReport } from "./watch-report.js";
 
 const SELECT_TTL_MS = 10 * 60 * 1000;
 const pendingDealSelections = new Map();
@@ -740,6 +742,41 @@ export async function handleStatusCommand(interaction) {
   });
 }
 
+export async function handleHelpCommand(interaction) {
+  await interaction.reply({
+    content: HELP_MESSAGE,
+    ephemeral: true,
+  });
+}
+
+export async function handleWatchReportCommand(interaction, config) {
+  if (!(await requireManageGuildPermission(interaction))) return;
+
+  await interaction.deferReply({ ephemeral: true });
+  const report = await collectWatchReport(config);
+  const summary = [
+    "**관심 게임 알림 리포트**",
+    `watch-list: ${report.stats.watches}개`,
+    `발송 후보: ${report.stats.wouldSend}개`,
+    `이미 보냄: ${report.stats.recentlyNotified}개`,
+    `할인율 부족: ${report.stats.belowMinDiscount}개`,
+    `스토어 필터 제외: ${report.stats.storeFiltered}개`,
+    `현재 할인 없음: ${report.stats.noCurrentDeal}개`,
+    `오류: ${report.stats.errors}개`,
+  ];
+  const details = report.lines.slice(0, 20);
+  const omitted = report.lines.length > details.length
+    ? `외 ${report.lines.length - details.length}개`
+    : "";
+
+  await interaction.editReply([
+    ...summary,
+    "",
+    ...details,
+    omitted,
+  ].filter(Boolean).join("\n").slice(0, 1900));
+}
+
 export async function handleInteraction(interaction, config) {
   try {
     if (interaction.isButton() && interaction.customId.startsWith("watch_share_confirm:")) {
@@ -788,6 +825,11 @@ export async function handleInteraction(interaction, config) {
     }
 
     if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName === "help") {
+      await handleHelpCommand(interaction);
+      return;
+    }
 
     if (interaction.commandName === "deal") {
       await handleDealCommand(interaction, config);
@@ -861,6 +903,11 @@ export async function handleInteraction(interaction, config) {
 
     if (interaction.commandName === "status") {
       await handleStatusCommand(interaction);
+      return;
+    }
+
+    if (interaction.commandName === "watch-report") {
+      await handleWatchReportCommand(interaction, config);
     }
   } catch (error) {
     console.error(`[error] /${interaction.commandName} failed:`, error);

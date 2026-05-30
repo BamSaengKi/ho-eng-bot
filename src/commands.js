@@ -20,6 +20,9 @@ export const slashCommands = [
         .setRequired(true),
     ),
   new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("봇 사용법을 본인만 볼 수 있게 보여줍니다."),
+  new SlashCommandBuilder()
     .setName("alias-add")
     .setDescription("게임 검색 별칭을 추가하거나 수정합니다.")
     .addStringOption((option) =>
@@ -124,6 +127,9 @@ export const slashCommands = [
   new SlashCommandBuilder()
     .setName("status")
     .setDescription("봇 운영 상태를 확인합니다. 관리자 전용입니다."),
+  new SlashCommandBuilder()
+    .setName("watch-report")
+    .setDescription("관심 게임 알림 스킵 사유를 확인합니다. 관리자 전용입니다."),
 ];
 
 export const commandPayloads = slashCommands.map((command) => command.toJSON());
