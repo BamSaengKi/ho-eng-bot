@@ -11,6 +11,7 @@ import { buildDealEmbed } from "./discord.js";
 import {
   getDealHistory,
   getGameKey,
+  getWatchSettings,
   hasExpiryNotification,
   hasRecentWatchNotification,
   listAllWatchSubscriptions,
@@ -113,6 +114,29 @@ function formatDealContent(group) {
 
 const WATCH_SHARE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
+function normalizeStore(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function matchesStoreFilter(deal, storeFilter) {
+  if (!storeFilter) return true;
+  const filters = String(storeFilter).split(",").map(normalizeStore).filter(Boolean);
+  if (filters.length === 0 || filters.includes("all")) return true;
+  const storeName = normalizeStore(deal.storeName);
+  const storeId = String(deal.storeID ?? "");
+  return filters.some((filter) =>
+    storeName.includes(filter) ||
+    storeId === filter ||
+    (filter === "epic" && storeName.includes("epicgame")) ||
+    (filter === "humble" && storeName.includes("humble")) ||
+    (filter === "ubisoft" && (storeName.includes("ubisoft") || storeName.includes("uplay"))) ||
+    (filter === "blizzard" && storeName.includes("blizzard")) ||
+    (filter === "steam" && storeName.includes("steam"))
+  );
+}
+
 function buildWatchShareButton(token) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -149,8 +173,14 @@ export async function postWatchDeals(client, config) {
         continue;
       }
 
+      const watchSettings = getWatchSettings(watch.userId);
       for (const candidate of candidates) {
-        if (Number(candidate.deal.savings) < Number(config.minDiscount ?? 1)) {
+        const minDiscount = Number(watchSettings.minDiscount ?? config.minDiscount ?? 1);
+        if (!matchesStoreFilter(candidate.deal, watchSettings.storeFilter)) {
+          stats.belowMinDiscount += 1;
+          continue;
+        }
+        if (Number(candidate.deal.savings) < minDiscount) {
           stats.belowMinDiscount += 1;
           continue;
         }
