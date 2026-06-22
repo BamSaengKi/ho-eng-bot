@@ -43,6 +43,7 @@ const config = {
   schedule: process.env.SCHEDULE_CRON || "0 10 * * *",
   timezone: process.env.TIMEZONE || "Asia/Seoul",
   minDiscount: Number(process.env.MIN_DISCOUNT || 10),
+  dailyMinDiscount: Number(process.env.DAILY_MIN_DISCOUNT || 50),
   maxDeals: Number(process.env.MAX_DEALS || 10),
   storeIds: (process.env.STORE_IDS || "1,11,13,25")
     .split(",")
@@ -167,6 +168,18 @@ function normalizeTitleText(value) {
     .trim();
 }
 
+function toTitleLabel(value) {
+  const smallWords = new Set(["a", "an", "and", "of", "the", "to"]);
+  return normalizeTitleText(value)
+    .split(" ")
+    .map((word, index) =>
+      index > 0 && smallWords.has(word)
+        ? word
+        : `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`
+    )
+    .join(" ");
+}
+
 function isSpecialEditionTitle(title) {
   const normalized = normalizeTitleText(title);
   return SPECIAL_EDITION_KEYWORDS.some((keyword) => normalized.includes(normalizeTitleText(keyword)));
@@ -179,9 +192,39 @@ function isRelatedContentTitle(title) {
 
 function getFranchiseGroup(title) {
   const normalized = normalizeTitleText(title);
-  return FRANCHISE_GROUPS.find((group) =>
+  const configuredGroup = FRANCHISE_GROUPS.find((group) =>
     group.keywords.some((keyword) => normalized.includes(normalizeTitleText(keyword))),
-  ) ?? null;
+  );
+  if (configuredGroup) return configuredGroup;
+
+  return inferFranchiseGroup(title);
+}
+
+function inferFranchiseGroup(title) {
+  let normalized = normalizeTitleText(title);
+  if (!normalized) return null;
+
+  for (const keyword of RELATED_CONTENT_KEYWORDS) {
+    normalized = normalized.replace(new RegExp(`\\b${normalizeTitleText(keyword).replaceAll(" ", "\\s+")}\\b`, "gi"), " ");
+  }
+
+  normalized = normalized
+    .replace(/\b(remastered|remake|collection|trilogy|anthology|franchise)\b/g, " ")
+    .replace(/\b(standard|complete|enhanced|director s cut)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const [beforeSeparator] = normalized.split(/\s(?:-|:|–|—)\s/);
+  const tokens = (beforeSeparator || normalized).split(" ").filter(Boolean);
+  while (tokens.length > 1 && /^(i{1,3}|iv|v|vi{0,3}|ix|x|\d+)$/.test(tokens.at(-1))) {
+    tokens.pop();
+  }
+
+  if (tokens.length < 2 || tokens.length > 4) return null;
+
+  const key = tokens.join("-");
+  const label = toTitleLabel(tokens.join(" "));
+  return { key: `auto-${key}`, label, keywords: [tokens.join(" ")] };
 }
 
 function getBaseTitle(title) {
@@ -275,7 +318,7 @@ function buildDailySummaryEmbed(deals, historyItems) {
   return new EmbedBuilder()
     .setColor(0x0f8f7f)
     .setTitle("오늘의 할인 정보")
-    .setDescription(`${config.region} 기준 ${config.minDiscount}% 이상 할인 중인 AAA급 게임을 찾았습니다.`)
+    .setDescription(`${config.region} 기준 ${config.dailyMinDiscount}% 이상 할인 중인 AAA급 게임을 찾았습니다.`)
     .addFields(
       {
         name: "요약",
@@ -301,6 +344,10 @@ function buildDailySummaryEmbed(deals, historyItems) {
 }
 
 async function collectAaaDeals() {
+  const dailyConfig = {
+    ...config,
+    minDiscount: config.dailyMinDiscount,
+  };
   const sentDeals = await readJson(SENT_DEALS_PATH, { dealIds: [] });
   const sentDealIds = new Set(sentDeals.dealIds ?? []);
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
@@ -314,7 +361,7 @@ async function collectAaaDeals() {
   }];
 
   try {
-    const rawItems = await fetchItadDealFeed(config);
+    const rawItems = await fetchItadDealFeed(dailyConfig);
     storeSummaries[0].discountedCount = rawItems.length;
     const baseRawItems = rawItems.filter((item) => !isRelatedContentTitle(item.deal.title));
     const editionRawItems = rawItems.filter((item) => isRelatedContentTitle(item.deal.title) || isSpecialEditionTitle(item.deal.title));
