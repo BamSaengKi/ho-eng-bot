@@ -7,6 +7,7 @@ import {
 import { randomUUID } from "node:crypto";
 import { fetchSteamAppDetails, fetchSteamAppReviews, fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
+import { appendAaaFeedbackButton } from "./components.js";
 import { buildDealEmbed } from "./discord.js";
 import {
   getDealHistory,
@@ -18,6 +19,7 @@ import {
   recordDealLookupHistory,
   recordExpiryNotification,
   recordWatchNotification,
+  saveAaaFeedbackContext,
   saveWatchShareContext,
 } from "./history.js";
 import { fetchItadCurrentDeals, fetchItadDealExpiry, isItadExpiryToday } from "./itad.js";
@@ -113,6 +115,7 @@ function formatDealContent(group) {
 }
 
 const WATCH_SHARE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+const AAA_FEEDBACK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 function normalizeStore(value) {
   return String(value ?? "")
@@ -144,6 +147,22 @@ function buildWatchShareButton(token) {
       .setLabel("공유하고 스레드 만들기")
       .setStyle(ButtonStyle.Primary),
   );
+}
+
+function createAaaFeedbackToken({ deal, steamDetails, aaaReason }) {
+  const token = randomUUID();
+  saveAaaFeedbackContext({
+    token,
+    deal,
+    steamDetails,
+    aaaReason,
+    expiresAt: new Date(Date.now() + AAA_FEEDBACK_TTL_MS).toISOString(),
+  });
+  return token;
+}
+
+function buildWatchActionRow(shareToken, feedbackToken) {
+  return appendAaaFeedbackButton(buildWatchShareButton(shareToken), feedbackToken);
 }
 
 export async function postWatchDeals(client, config) {
@@ -244,6 +263,11 @@ export async function postWatchDeals(client, config) {
           dealExpiry: group.dealExpiry,
           expiresAt: new Date(Date.now() + WATCH_SHARE_TTL_MS).toISOString(),
         });
+        const feedbackToken = createAaaFeedbackToken({
+          deal: group.deal,
+          steamDetails: group.steamDetails,
+          aaaReason: "개인 관심 게임",
+        });
         const messageFiles = chart
           ? [new AttachmentBuilder(chart, { name: historyImageName })]
           : [];
@@ -262,7 +286,7 @@ export async function postWatchDeals(client, config) {
             }),
           ],
           files: messageFiles,
-          components: [buildWatchShareButton(shareToken)],
+          components: [buildWatchActionRow(shareToken, feedbackToken)],
         });
 
         recordWatchNotification(watcher.userId, watcher.deal);

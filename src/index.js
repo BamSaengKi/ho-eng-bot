@@ -1,10 +1,12 @@
 import "dotenv/config";
 import cron from "node-cron";
-import { AttachmentBuilder, Client, EmbedBuilder, Events, GatewayIntentBits } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, Client, EmbedBuilder, Events, GatewayIntentBits } from "discord.js";
+import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { classifyAaaGame } from "./classifier.js";
+import { buildAaaFeedbackButton, buildAaaFeedbackRow } from "./components.js";
 import { FRANCHISE_GROUPS, RELATED_CONTENT_KEYWORDS, SPECIAL_EDITION_KEYWORDS } from "./config.js";
 import { buildDealEmbed, buildSeriesDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
@@ -17,6 +19,7 @@ import {
   recordAppNotification,
   recordDealHistories,
   recordExpiryNotification,
+  saveAaaFeedbackContext,
 } from "./history.js";
 import { handleInteraction } from "./interactions.js";
 import {
@@ -36,6 +39,7 @@ import { readJson, writeJson } from "./storage.js";
 
 const DATA_DIR = resolve(process.env.DATA_DIR || "data");
 const SENT_DEALS_PATH = resolve(DATA_DIR, "sent-deals.json");
+const AAA_FEEDBACK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 const config = {
   token: process.env.DISCORD_TOKEN,
@@ -84,6 +88,33 @@ function formatDryRunPrice(value, currency = "USD") {
     currency,
     maximumFractionDigits: currency === "KRW" ? 0 : 2,
   }).format(Number(value));
+}
+
+function createAaaFeedbackToken({ deal, steamDetails, aaaReason }) {
+  const token = randomUUID();
+  saveAaaFeedbackContext({
+    token,
+    deal,
+    steamDetails,
+    aaaReason,
+    expiresAt: new Date(Date.now() + AAA_FEEDBACK_TTL_MS).toISOString(),
+  });
+  return token;
+}
+
+function buildSeriesAaaFeedbackRows(items) {
+  const buttons = items.slice(0, 5).map((item) => {
+    const token = createAaaFeedbackToken({
+      deal: item.deal,
+      steamDetails: item.steamDetails,
+      aaaReason: item.aaaReason,
+    });
+    return buildAaaFeedbackButton(token, `AAA 아님: ${item.deal.title}`);
+  });
+
+  return buttons.length > 0
+    ? [new ActionRowBuilder().addComponents(...buttons)]
+    : [];
 }
 
 function printDryRunDeals(deals, usdToKrw, storeSummaries) {
@@ -442,6 +473,7 @@ async function postDailyDeals(client) {
             footerText: "오늘의 할인 정보",
           }),
         ],
+        components: buildSeriesAaaFeedbackRows(item.items),
       });
       for (const entry of item.items) {
         sentDealIds.add(entry.deal.dealID);
@@ -468,6 +500,11 @@ async function postDailyDeals(client) {
         }),
       ],
       files,
+      components: [buildAaaFeedbackRow(createAaaFeedbackToken({
+        deal: item.deal,
+        steamDetails: item.steamDetails,
+        aaaReason: item.aaaReason,
+      }))],
     });
     sentDealIds.add(item.deal.dealID);
   }
@@ -517,6 +554,11 @@ async function postDailyExpiryReminders(channel, deals, usdToKrw) {
         }),
       ],
       files,
+      components: [buildAaaFeedbackRow(createAaaFeedbackToken({
+        deal: item.deal,
+        steamDetails: item.steamDetails,
+        aaaReason: item.aaaReason,
+      }))],
     });
     recordExpiryNotification("daily", item.deal, item.dealExpiry.raw);
   }

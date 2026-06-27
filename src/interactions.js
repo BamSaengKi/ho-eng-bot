@@ -7,8 +7,14 @@ import {
   StringSelectMenuOptionBuilder,
   PermissionFlagsBits,
 } from "discord.js";
+import { randomUUID } from "node:crypto";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
+import {
+  appendAaaFeedbackButton,
+  buildAaaFeedbackReviewButtons,
+  buildAaaFeedbackRow,
+} from "./components.js";
 import { buildDealEmbed, buildHistoryEmbed } from "./discord.js";
 import {
   findCurrentDealFromGame,
@@ -31,11 +37,17 @@ import {
   normalizeAlias,
   recordDealLookupHistory,
   addWatchSubscription,
+  approveAaaFeedback,
   cleanupWatchSubscriptions,
   clearWatchSubscriptions,
+  createAaaFeedback,
+  getAaaFeedback,
+  getAaaFeedbackContext,
   removeAlias,
   removeWatchSubscription,
   removeWatchSubscriptionById,
+  rejectAaaFeedback,
+  saveAaaFeedbackContext,
   upsertWatchSettings,
   upsertAlias,
 } from "./history.js";
@@ -46,6 +58,7 @@ import { HELP_MESSAGE } from "./help.js";
 import { collectWatchReport } from "./watch-report.js";
 
 const SELECT_TTL_MS = 10 * 60 * 1000;
+const AAA_FEEDBACK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 const pendingDealSelections = new Map();
 const pendingDealShares = new Map();
 const pendingWatchSelections = new Map();
@@ -265,6 +278,33 @@ function buildShareButton(id) {
   );
 }
 
+function createAaaFeedbackToken({ deal, steamDetails, aaaReason }) {
+  const token = randomUUID();
+  saveAaaFeedbackContext({
+    token,
+    deal,
+    steamDetails,
+    aaaReason,
+    expiresAt: new Date(Date.now() + AAA_FEEDBACK_TTL_MS).toISOString(),
+  });
+  return token;
+}
+
+function buildDealActionRow(shareId, feedbackToken) {
+  return appendAaaFeedbackButton(buildShareButton(shareId), feedbackToken);
+}
+
+function formatFeedbackReviewMessage(feedback) {
+  return [
+    "**AAA 판정 피드백 검토**",
+    `게임: **${feedback.title}**`,
+    `game key: \`${feedback.gameKey}\``,
+    feedback.storeId ? `store: \`${feedback.storeId}\`` : "",
+    feedback.reason ? `기존 판정: ${feedback.reason}` : "",
+    `신고자: <@${feedback.reportedBy}>`,
+  ].filter(Boolean).join("\n");
+}
+
 function buildShareConfirmButtons(id) {
   const suffix = id.replace("deal_share:", "");
   return new ActionRowBuilder().addComponents(
@@ -314,6 +354,7 @@ function getUserDisplayName(interaction) {
 
 async function renderDealResult(interaction, result, config, startedAt, correction) {
   const usdToKrw = await fetchUsdToKrw(config.fallbackUsdToKrw);
+  const aaaReason = "사용자 명령어 조회";
   recordDealLookupHistory({
     deal: result.deal,
     steamDetails: result.steamDetails,
@@ -335,11 +376,16 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
     historyCount: history.length,
     expiresAt: Date.now() + SELECT_TTL_MS,
   });
+  const feedbackToken = createAaaFeedbackToken({
+    deal: result.deal,
+    steamDetails: result.steamDetails,
+    aaaReason,
+  });
 
   await interaction.editReply({
     content: "",
     embeds: [
-      buildDealEmbed(result.deal, result.steamDetails, "사용자 명령어 조회", usdToKrw, {
+      buildDealEmbed(result.deal, result.steamDetails, aaaReason, usdToKrw, {
         hasHistoryChart: Boolean(chart),
         historyCount: history.length,
         history,
@@ -351,7 +397,7 @@ async function renderDealResult(interaction, result, config, startedAt, correcti
       }),
     ],
     files,
-    components: [buildShareButton(shareId)],
+    components: [buildDealActionRow(shareId, feedbackToken)],
   });
 }
 
@@ -736,6 +782,8 @@ export async function handleStatusCommand(interaction) {
       `watch settings: ${summary.watchSettings}명`,
       `deal history: ${summary.dealHistory}개`,
       `aliases: ${summary.aliases}개`,
+      `AAA feedback pending: ${summary.aaaFeedbackPending}개`,
+      `AAA blacklist: ${summary.aaaBlacklist}개`,
       `last scheduled run: ${formatStatusTime(lastScheduled?.sentAt)}`,
     ].join("\n"),
     ephemeral: true,
@@ -779,6 +827,21 @@ export async function handleWatchReportCommand(interaction, config) {
 
 export async function handleInteraction(interaction, config) {
   try {
+    if (interaction.isButton() && interaction.customId.startsWith("aaa_feedback_approve:")) {
+      await handleAaaFeedbackApprove(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("aaa_feedback_reject:")) {
+      await handleAaaFeedbackReject(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("aaa_feedback:")) {
+      await handleAaaFeedbackReport(interaction, config);
+      return;
+    }
+
     if (interaction.isButton() && interaction.customId.startsWith("watch_share_confirm:")) {
       await handleWatchShareConfirm(interaction, config);
       return;
@@ -925,6 +988,121 @@ export async function handleInteraction(interaction, config) {
   }
 }
 
+async function sendAaaFeedbackReview(interaction, config, feedback) {
+  const channel = interaction.channel?.isTextBased() && interaction.channel.guild
+    ? interaction.channel
+    : await interaction.client.channels.fetch(config.channelId).catch(() => null);
+
+  if (!channel?.isTextBased()) {
+    return false;
+  }
+
+  await channel.send({
+    content: formatFeedbackReviewMessage(feedback),
+    components: [buildAaaFeedbackReviewButtons(feedback.id)],
+  });
+  return true;
+}
+
+async function handleAaaFeedbackReport(interaction, config) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const token = interaction.customId.replace("aaa_feedback:", "");
+  const context = getAaaFeedbackContext(token);
+  if (!context) {
+    await interaction.editReply({
+      content: "신고 가능한 시간이 만료되었습니다. 새 할인 카드에서 다시 신고해주세요.",
+    });
+    return;
+  }
+
+  const result = createAaaFeedback(context, interaction.user.id);
+  if (result.status === "blacklisted") {
+    await interaction.editReply({
+      content: `"${context.title}"은 이미 AAA 블랙리스트에 있습니다.`,
+    });
+    return;
+  }
+
+  if (result.status === "pending") {
+    await interaction.editReply({
+      content: `"${context.title}"은 이미 관리자 검토 대기 중입니다.`,
+    });
+    return;
+  }
+
+  const sent = await sendAaaFeedbackReview(interaction, config, result.feedback);
+  await interaction.editReply({
+    content: sent
+      ? `"${context.title}"을 관리자 검토로 보냈습니다.`
+      : `"${context.title}" 신고는 저장했지만 검토 채널을 찾지 못했습니다.`,
+  });
+}
+
+async function handleAaaFeedbackApprove(interaction) {
+  if (!(await requireManageGuildPermission(interaction))) return;
+  await interaction.deferUpdate();
+
+  const feedbackId = Number(interaction.customId.replace("aaa_feedback_approve:", ""));
+  const feedback = getAaaFeedback(feedbackId);
+  if (!feedback) {
+    await interaction.editReply({
+      content: "피드백 항목을 찾지 못했습니다.",
+      components: [],
+    });
+    return;
+  }
+
+  if (feedback.status !== "pending") {
+    await interaction.editReply({
+      content: `이미 처리된 피드백입니다: ${feedback.status}`,
+      components: [],
+    });
+    return;
+  }
+
+  const approved = approveAaaFeedback(feedbackId, interaction.user.id);
+  await interaction.editReply({
+    content: [
+      `AAA 블랙리스트에 추가했습니다: **${approved.title}**`,
+      `처리자: <@${interaction.user.id}>`,
+    ].join("\n"),
+    components: [],
+  });
+}
+
+async function handleAaaFeedbackReject(interaction) {
+  if (!(await requireManageGuildPermission(interaction))) return;
+  await interaction.deferUpdate();
+
+  const feedbackId = Number(interaction.customId.replace("aaa_feedback_reject:", ""));
+  const feedback = getAaaFeedback(feedbackId);
+  if (!feedback) {
+    await interaction.editReply({
+      content: "피드백 항목을 찾지 못했습니다.",
+      components: [],
+    });
+    return;
+  }
+
+  if (feedback.status !== "pending") {
+    await interaction.editReply({
+      content: `이미 처리된 피드백입니다: ${feedback.status}`,
+      components: [],
+    });
+    return;
+  }
+
+  const rejected = rejectAaaFeedback(feedbackId, interaction.user.id);
+  await interaction.editReply({
+    content: [
+      `AAA 블랙리스트 추가를 거절했습니다: **${rejected.title}**`,
+      `처리자: <@${interaction.user.id}>`,
+    ].join("\n"),
+    components: [],
+  });
+}
+
 async function handleDealShare(interaction, config) {
   cleanupSelections();
   const share = pendingDealShares.get(interaction.customId);
@@ -1009,6 +1187,11 @@ async function handleDealShareConfirm(interaction, config) {
   const files = chart
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
     : [];
+  const feedbackToken = createAaaFeedbackToken({
+    deal: share.deal,
+    steamDetails: share.steamDetails,
+    aaaReason: "공유된 사용자 조회",
+  });
   const message = await interaction.channel.send({
     content: `<@${interaction.user.id}>님이 공유한 할인 정보입니다.`,
     embeds: [
@@ -1022,6 +1205,7 @@ async function handleDealShareConfirm(interaction, config) {
       }),
     ],
     files,
+    components: [buildAaaFeedbackRow(feedbackToken)],
   });
 
   try {
@@ -1206,6 +1390,11 @@ async function handleWatchShareConfirm(interaction, config) {
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
     : [];
   const displayName = getUserDisplayName(interaction);
+  const feedbackToken = createAaaFeedbackToken({
+    deal: shareResult.deal,
+    steamDetails: shareResult.steamDetails,
+    aaaReason: "개인 관심 게임 공유",
+  });
   const message = await channel.send({
     content: `<@${interaction.user.id}>님이 관심 게임 할인 정보를 공유했습니다.`,
     embeds: [
@@ -1219,6 +1408,7 @@ async function handleWatchShareConfirm(interaction, config) {
       }),
     ],
     files,
+    components: [buildAaaFeedbackRow(feedbackToken)],
   });
 
   try {
@@ -1259,6 +1449,11 @@ async function shareWatchDealContext(interaction, config, context) {
     ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
     : [];
   const displayName = getUserDisplayName(interaction);
+  const feedbackToken = createAaaFeedbackToken({
+    deal: context.deal,
+    steamDetails: context.steamDetails,
+    aaaReason: "개인 관심 게임 공유",
+  });
   const message = await channel.send({
     content: `<@${interaction.user.id}>님이 관심 게임 할인 정보를 공유했습니다.`,
     embeds: [
@@ -1272,6 +1467,7 @@ async function shareWatchDealContext(interaction, config, context) {
       }),
     ],
     files,
+    components: [buildAaaFeedbackRow(feedbackToken)],
   });
 
   try {

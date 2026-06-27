@@ -139,6 +139,42 @@ function openDatabase() {
       key TEXT PRIMARY KEY,
       sent_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS aaa_feedback_contexts (
+      token TEXT PRIMARY KEY,
+      game_key TEXT NOT NULL,
+      title TEXT NOT NULL,
+      store_id TEXT,
+      deal_json TEXT NOT NULL,
+      steam_details_json TEXT,
+      aaa_reason TEXT,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS aaa_feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      game_key TEXT NOT NULL,
+      title TEXT NOT NULL,
+      store_id TEXT,
+      reason TEXT,
+      reported_by TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL,
+      reviewed_by TEXT,
+      reviewed_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_aaa_feedback_status_created
+      ON aaa_feedback (status, created_at);
+
+    CREATE TABLE IF NOT EXISTS aaa_blacklist (
+      game_key TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      source_feedback_id INTEGER,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
   const columns = db.prepare("PRAGMA table_info(deal_history)").all();
   if (!columns.some((column) => column.name === "price_currency")) {
@@ -254,6 +290,261 @@ export function deleteWatchShareContext(token) {
   const db = openDatabase();
   try {
     db.prepare("DELETE FROM watch_share_contexts WHERE token = ?").run(token);
+  } finally {
+    db.close();
+  }
+}
+
+export function saveAaaFeedbackContext({
+  token,
+  deal,
+  steamDetails,
+  aaaReason,
+  createdAt = new Date().toISOString(),
+  expiresAt,
+}) {
+  const db = openDatabase();
+  try {
+    db.prepare(`
+      INSERT OR REPLACE INTO aaa_feedback_contexts (
+        token,
+        game_key,
+        title,
+        store_id,
+        deal_json,
+        steam_details_json,
+        aaa_reason,
+        created_at,
+        expires_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      token,
+      getGameKey(deal),
+      deal.title ?? steamDetails?.name ?? "Unknown",
+      String(deal.storeID ?? ""),
+      JSON.stringify(deal),
+      steamDetails ? JSON.stringify(steamDetails) : null,
+      aaaReason ?? null,
+      createdAt,
+      expiresAt,
+    );
+  } finally {
+    db.close();
+  }
+}
+
+export function getAaaFeedbackContext(token) {
+  const db = openDatabase();
+  try {
+    const row = db.prepare(`
+      SELECT
+        token,
+        game_key AS gameKey,
+        title,
+        store_id AS storeId,
+        deal_json AS dealJson,
+        steam_details_json AS steamDetailsJson,
+        aaa_reason AS aaaReason,
+        created_at AS createdAt,
+        expires_at AS expiresAt
+      FROM aaa_feedback_contexts
+      WHERE token = ?
+    `).get(token);
+
+    if (!row) return null;
+    if (new Date(row.expiresAt).getTime() <= Date.now()) return null;
+
+    return {
+      token: row.token,
+      gameKey: row.gameKey,
+      title: row.title,
+      storeId: row.storeId,
+      deal: parseJson(row.dealJson),
+      steamDetails: parseJson(row.steamDetailsJson),
+      aaaReason: row.aaaReason,
+      createdAt: row.createdAt,
+      expiresAt: row.expiresAt,
+    };
+  } finally {
+    db.close();
+  }
+}
+
+export function createAaaFeedback(context, reportedBy, createdAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    const existingBlacklist = db.prepare(`
+      SELECT game_key AS gameKey, title
+      FROM aaa_blacklist
+      WHERE game_key = ?
+      LIMIT 1
+    `).get(context.gameKey);
+    if (existingBlacklist) {
+      return { status: "blacklisted", blacklist: existingBlacklist };
+    }
+
+    const existingPending = db.prepare(`
+      SELECT
+        id,
+        game_key AS gameKey,
+        title,
+        store_id AS storeId,
+        reason,
+        reported_by AS reportedBy,
+        status,
+        created_at AS createdAt
+      FROM aaa_feedback
+      WHERE game_key = ?
+        AND status = 'pending'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `).get(context.gameKey);
+    if (existingPending) {
+      return { status: "pending", feedback: existingPending };
+    }
+
+    const result = db.prepare(`
+      INSERT INTO aaa_feedback (
+        game_key,
+        title,
+        store_id,
+        reason,
+        reported_by,
+        status,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, ?, 'pending', ?)
+    `).run(
+      context.gameKey,
+      context.title,
+      context.storeId ?? null,
+      context.aaaReason ?? null,
+      reportedBy,
+      createdAt,
+    );
+
+    return {
+      status: "created",
+      feedback: {
+        id: result.lastInsertRowid,
+        gameKey: context.gameKey,
+        title: context.title,
+        storeId: context.storeId ?? null,
+        reason: context.aaaReason ?? null,
+        reportedBy,
+        status: "pending",
+        createdAt,
+      },
+    };
+  } finally {
+    db.close();
+  }
+}
+
+export function getAaaFeedback(id) {
+  const db = openDatabase();
+  try {
+    return db.prepare(`
+      SELECT
+        id,
+        game_key AS gameKey,
+        title,
+        store_id AS storeId,
+        reason,
+        reported_by AS reportedBy,
+        status,
+        created_at AS createdAt,
+        reviewed_by AS reviewedBy,
+        reviewed_at AS reviewedAt
+      FROM aaa_feedback
+      WHERE id = ?
+    `).get(id) ?? null;
+  } finally {
+    db.close();
+  }
+}
+
+export function approveAaaFeedback(id, reviewedBy, reviewedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    db.exec("BEGIN");
+    const feedback = db.prepare(`
+      SELECT
+        id,
+        game_key AS gameKey,
+        title,
+        status
+      FROM aaa_feedback
+      WHERE id = ?
+    `).get(id);
+    if (!feedback) {
+      db.exec("ROLLBACK");
+      return null;
+    }
+
+    db.prepare(`
+      INSERT INTO aaa_blacklist (
+        game_key,
+        title,
+        source_feedback_id,
+        created_by,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(game_key) DO UPDATE SET
+        title = excluded.title,
+        source_feedback_id = excluded.source_feedback_id,
+        created_by = excluded.created_by,
+        created_at = excluded.created_at
+    `).run(feedback.gameKey, feedback.title, id, reviewedBy, reviewedAt);
+
+    db.prepare(`
+      UPDATE aaa_feedback
+      SET status = 'approved',
+        reviewed_by = ?,
+        reviewed_at = ?
+      WHERE id = ?
+    `).run(reviewedBy, reviewedAt, id);
+    db.exec("COMMIT");
+
+    return { ...feedback, status: "approved", reviewedBy, reviewedAt };
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  } finally {
+    db.close();
+  }
+}
+
+export function rejectAaaFeedback(id, reviewedBy, reviewedAt = new Date().toISOString()) {
+  const db = openDatabase();
+  try {
+    const feedback = getAaaFeedback(id);
+    if (!feedback) return null;
+    db.prepare(`
+      UPDATE aaa_feedback
+      SET status = 'rejected',
+        reviewed_by = ?,
+        reviewed_at = ?
+      WHERE id = ?
+    `).run(reviewedBy, reviewedAt, id);
+    return { ...feedback, status: "rejected", reviewedBy, reviewedAt };
+  } finally {
+    db.close();
+  }
+}
+
+export function isAaaBlacklisted(deal) {
+  const db = openDatabase();
+  try {
+    const row = db.prepare(`
+      SELECT game_key AS gameKey, title
+      FROM aaa_blacklist
+      WHERE game_key = ?
+      LIMIT 1
+    `).get(getGameKey(deal));
+    return row ?? null;
   } finally {
     db.close();
   }
@@ -686,6 +977,8 @@ export function getStorageSummary() {
       watchlist: db.prepare("SELECT COUNT(*) AS count FROM watchlist").get().count,
       watchUsers: db.prepare("SELECT COUNT(DISTINCT user_id) AS count FROM watchlist").get().count,
       watchSettings: db.prepare("SELECT COUNT(*) AS count FROM watch_settings").get().count,
+      aaaFeedbackPending: db.prepare("SELECT COUNT(*) AS count FROM aaa_feedback WHERE status = 'pending'").get().count,
+      aaaBlacklist: db.prepare("SELECT COUNT(*) AS count FROM aaa_blacklist").get().count,
     };
   } finally {
     db.close();
