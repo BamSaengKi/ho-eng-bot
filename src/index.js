@@ -1,22 +1,26 @@
 import "dotenv/config";
 import cron from "node-cron";
-import { AttachmentBuilder, Client, EmbedBuilder, Events, GatewayIntentBits } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, Client, EmbedBuilder, Events, GatewayIntentBits } from "discord.js";
+import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { fetchUsdToKrw } from "./api.js";
 import { generateDiscountHistoryChartPng } from "./chart.js";
 import { classifyAaaGame } from "./classifier.js";
+import { buildAaaFeedbackButton, buildAaaFeedbackRow } from "./components.js";
 import { FRANCHISE_GROUPS, RELATED_CONTENT_KEYWORDS, SPECIAL_EDITION_KEYWORDS } from "./config.js";
 import { buildDealEmbed, buildSeriesDealEmbed } from "./discord.js";
 import { handleHelpMessage } from "./help.js";
 import {
   getDealHistory,
   getGameKey,
+  hasRecentSentDealHistory,
   hasRecentAppNotification,
   hasExpiryNotification,
   listWatchUserIds,
   recordAppNotification,
   recordDealHistories,
   recordExpiryNotification,
+  saveAaaFeedbackContext,
 } from "./history.js";
 import { handleInteraction } from "./interactions.js";
 import {
@@ -36,6 +40,7 @@ import { readJson, writeJson } from "./storage.js";
 
 const DATA_DIR = resolve(process.env.DATA_DIR || "data");
 const SENT_DEALS_PATH = resolve(DATA_DIR, "sent-deals.json");
+const AAA_FEEDBACK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 const config = {
   token: process.env.DISCORD_TOKEN,
@@ -84,6 +89,33 @@ function formatDryRunPrice(value, currency = "USD") {
     currency,
     maximumFractionDigits: currency === "KRW" ? 0 : 2,
   }).format(Number(value));
+}
+
+function createAaaFeedbackToken({ deal, steamDetails, aaaReason }) {
+  const token = randomUUID();
+  saveAaaFeedbackContext({
+    token,
+    deal,
+    steamDetails,
+    aaaReason,
+    expiresAt: new Date(Date.now() + AAA_FEEDBACK_TTL_MS).toISOString(),
+  });
+  return token;
+}
+
+function buildSeriesAaaFeedbackRows(items) {
+  const buttons = items.slice(0, 5).map((item) => {
+    const token = createAaaFeedbackToken({
+      deal: item.deal,
+      steamDetails: item.steamDetails,
+      aaaReason: item.aaaReason,
+    });
+    return buildAaaFeedbackButton(token, `AAA 아님: ${item.deal.title}`);
+  });
+
+  return buttons.length > 0
+    ? [new ActionRowBuilder().addComponents(...buttons)]
+    : [];
 }
 
 function printDryRunDeals(deals, usdToKrw, storeSummaries) {
@@ -237,20 +269,26 @@ function getBaseTitle(title) {
     .trim();
 }
 
+function getRelatedEditionKey(deal) {
+  const group = getFranchiseGroup(deal.title);
+  const baseTitle = group?.key ?? getBaseTitle(deal.title);
+  if (!baseTitle || deal.storeID == null) return null;
+  return `${baseTitle}:${String(deal.storeID)}`;
+}
+
 function attachRelatedEditions(baseItems, editionItems) {
-  const editionsByBase = new Map();
+  const editionsByBaseAndStore = new Map();
   for (const item of editionItems) {
-    const group = getFranchiseGroup(item.deal.title);
-    const baseTitle = group?.key ?? getBaseTitle(item.deal.title);
-    if (!baseTitle) continue;
-    const editions = editionsByBase.get(baseTitle) ?? [];
+    const key = getRelatedEditionKey(item.deal);
+    if (!key) continue;
+    const editions = editionsByBaseAndStore.get(key) ?? [];
     editions.push(item.deal);
-    editionsByBase.set(baseTitle, editions);
+    editionsByBaseAndStore.set(key, editions);
   }
 
   return baseItems.map((item) => ({
     ...item,
-    relatedEditions: (editionsByBase.get(getFranchiseGroup(item.deal.title)?.key ?? getBaseTitle(item.deal.title)) ?? [])
+    relatedEditions: (editionsByBaseAndStore.get(getRelatedEditionKey(item.deal)) ?? [])
       .sort((a, b) => Number(b.savings) - Number(a.savings))
       .slice(0, 5),
   }));
@@ -392,11 +430,14 @@ async function collectAaaDeals() {
   }
 
   const notificationItems = historyItems.filter((item) => {
-    if (config.includeSent) return true;
-    if (!sentDealIds.has(item.deal.dealID)) return true;
+    if (config.includeSent || config.dryRun) return true;
 
     const historyKey = `${getGameKey(item.deal)}:${item.deal.storeID}`;
-    return savedHistory.get(historyKey) === true;
+    // dealID는 외부 API에서 같은 할인 중에도 바뀔 수 있다. 새 할인 기록이거나
+    // 과거 동일 할인 기록이 실제 발송된 적 없는 경우에만 알림 대상으로 삼는다.
+    if (savedHistory.get(historyKey) === true) return true;
+    if (sentDealIds.has(item.deal.dealID)) return false;
+    return !hasRecentSentDealHistory(item.deal, sentDealIds);
   });
 
   const deals = groupDisplayDeals(notificationItems).slice(0, config.maxDeals);
@@ -442,15 +483,20 @@ async function postDailyDeals(client) {
             footerText: "오늘의 할인 정보",
           }),
         ],
+        components: buildSeriesAaaFeedbackRows(item.items),
       });
       for (const entry of item.items) {
         sentDealIds.add(entry.deal.dealID);
+        if (entry.dealExpiry?.isToday && entry.dealExpiry.raw) {
+          recordExpiryNotification("daily", entry.deal, entry.dealExpiry.raw);
+        }
       }
       continue;
     }
 
     const history = getDealHistory(item.deal);
     const dealExpiry = item.dealExpiry ?? await fetchItadDealExpiry(item.deal, config);
+    const expiryReminder = isItadExpiryToday(dealExpiry);
     const chart = await generateDiscountHistoryChartPng(history, item.deal.title);
     const files = chart
       ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -463,13 +509,25 @@ async function postDailyDeals(client) {
           historyCount: history.length,
           history,
           dealExpiry,
+          expiryReminder,
           relatedEditions: item.relatedEditions,
-          footerText: "오늘의 할인 정보",
+          lookupLabel: expiryReminder
+            ? `${config.region} 할인 종료 알림\n오늘 할인 종료일이에요.`
+            : undefined,
+          footerText: expiryReminder ? "할인 종료 알림" : "오늘의 할인 정보",
         }),
       ],
       files,
+      components: [buildAaaFeedbackRow(createAaaFeedbackToken({
+        deal: item.deal,
+        steamDetails: item.steamDetails,
+        aaaReason: item.aaaReason,
+      }))],
     });
     sentDealIds.add(item.deal.dealID);
+    if (expiryReminder && dealExpiry?.raw) {
+      recordExpiryNotification("daily", item.deal, dealExpiry.raw);
+    }
   }
 
   await writeJson(SENT_DEALS_PATH, {
@@ -517,6 +575,11 @@ async function postDailyExpiryReminders(channel, deals, usdToKrw) {
         }),
       ],
       files,
+      components: [buildAaaFeedbackRow(createAaaFeedbackToken({
+        deal: item.deal,
+        steamDetails: item.steamDetails,
+        aaaReason: item.aaaReason,
+      }))],
     });
     recordExpiryNotification("daily", item.deal, item.dealExpiry.raw);
   }

@@ -5,6 +5,7 @@ import {
   AAA_TITLE_KEYWORDS,
   EXCLUDED_TITLE_KEYWORDS,
 } from "./config.js";
+import { isAaaBlacklisted } from "./history.js";
 
 function normalize(value) {
   return String(value ?? "")
@@ -39,6 +40,14 @@ export function classifyAaaGame(deal, steamDetails) {
   const matchedKeyword = AAA_TITLE_KEYWORDS.find((keyword) => includesAny(title, [keyword]));
   const matchedStrongKeyword = AAA_STRONG_TITLE_KEYWORDS.find((keyword) => includesAny(title, [keyword]));
   const steamReviewCount = Number(deal.steamRatingCount);
+  const blacklisted = isAaaBlacklisted(deal);
+
+  if (blacklisted) {
+    return {
+      isAaa: false,
+      reason: `관리자 블랙리스트 제외: ${blacklisted.title}`,
+    };
+  }
 
   if (excludedKeyword) {
     return {
