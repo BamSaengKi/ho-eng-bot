@@ -13,6 +13,7 @@ import { handleHelpMessage } from "./help.js";
 import {
   getDealHistory,
   getGameKey,
+  hasRecentSentDealHistory,
   hasRecentAppNotification,
   hasExpiryNotification,
   listWatchUserIds,
@@ -268,20 +269,26 @@ function getBaseTitle(title) {
     .trim();
 }
 
+function getRelatedEditionKey(deal) {
+  const group = getFranchiseGroup(deal.title);
+  const baseTitle = group?.key ?? getBaseTitle(deal.title);
+  if (!baseTitle || deal.storeID == null) return null;
+  return `${baseTitle}:${String(deal.storeID)}`;
+}
+
 function attachRelatedEditions(baseItems, editionItems) {
-  const editionsByBase = new Map();
+  const editionsByBaseAndStore = new Map();
   for (const item of editionItems) {
-    const group = getFranchiseGroup(item.deal.title);
-    const baseTitle = group?.key ?? getBaseTitle(item.deal.title);
-    if (!baseTitle) continue;
-    const editions = editionsByBase.get(baseTitle) ?? [];
+    const key = getRelatedEditionKey(item.deal);
+    if (!key) continue;
+    const editions = editionsByBaseAndStore.get(key) ?? [];
     editions.push(item.deal);
-    editionsByBase.set(baseTitle, editions);
+    editionsByBaseAndStore.set(key, editions);
   }
 
   return baseItems.map((item) => ({
     ...item,
-    relatedEditions: (editionsByBase.get(getFranchiseGroup(item.deal.title)?.key ?? getBaseTitle(item.deal.title)) ?? [])
+    relatedEditions: (editionsByBaseAndStore.get(getRelatedEditionKey(item.deal)) ?? [])
       .sort((a, b) => Number(b.savings) - Number(a.savings))
       .slice(0, 5),
   }));
@@ -423,11 +430,14 @@ async function collectAaaDeals() {
   }
 
   const notificationItems = historyItems.filter((item) => {
-    if (config.includeSent) return true;
-    if (!sentDealIds.has(item.deal.dealID)) return true;
+    if (config.includeSent || config.dryRun) return true;
 
     const historyKey = `${getGameKey(item.deal)}:${item.deal.storeID}`;
-    return savedHistory.get(historyKey) === true;
+    // dealID는 외부 API에서 같은 할인 중에도 바뀔 수 있다. 새 할인 기록이거나
+    // 과거 동일 할인 기록이 실제 발송된 적 없는 경우에만 알림 대상으로 삼는다.
+    if (savedHistory.get(historyKey) === true) return true;
+    if (sentDealIds.has(item.deal.dealID)) return false;
+    return !hasRecentSentDealHistory(item.deal, sentDealIds);
   });
 
   const deals = groupDisplayDeals(notificationItems).slice(0, config.maxDeals);
@@ -477,12 +487,16 @@ async function postDailyDeals(client) {
       });
       for (const entry of item.items) {
         sentDealIds.add(entry.deal.dealID);
+        if (entry.dealExpiry?.isToday && entry.dealExpiry.raw) {
+          recordExpiryNotification("daily", entry.deal, entry.dealExpiry.raw);
+        }
       }
       continue;
     }
 
     const history = getDealHistory(item.deal);
     const dealExpiry = item.dealExpiry ?? await fetchItadDealExpiry(item.deal, config);
+    const expiryReminder = isItadExpiryToday(dealExpiry);
     const chart = await generateDiscountHistoryChartPng(history, item.deal.title);
     const files = chart
       ? [new AttachmentBuilder(chart, { name: "discount-history.png" })]
@@ -495,8 +509,12 @@ async function postDailyDeals(client) {
           historyCount: history.length,
           history,
           dealExpiry,
+          expiryReminder,
           relatedEditions: item.relatedEditions,
-          footerText: "오늘의 할인 정보",
+          lookupLabel: expiryReminder
+            ? `${config.region} 할인 종료 알림\n오늘 할인 종료일이에요.`
+            : undefined,
+          footerText: expiryReminder ? "할인 종료 알림" : "오늘의 할인 정보",
         }),
       ],
       files,
@@ -507,6 +525,9 @@ async function postDailyDeals(client) {
       }))],
     });
     sentDealIds.add(item.deal.dealID);
+    if (expiryReminder && dealExpiry?.raw) {
+      recordExpiryNotification("daily", item.deal, dealExpiry.raw);
+    }
   }
 
   await writeJson(SENT_DEALS_PATH, {

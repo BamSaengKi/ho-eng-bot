@@ -1182,6 +1182,36 @@ export function recordDealLookupHistory(item, checkedAt = new Date().toISOString
   return recordDealHistories([item], checkedAt);
 }
 
+export function hasRecentSentDealHistory(
+  deal,
+  sentDealIds,
+  maxAgeMs = DEFAULT_SAME_DISCOUNT_COOLDOWN_MS,
+  checkedAt = new Date().toISOString(),
+) {
+  if (!sentDealIds || sentDealIds.size === 0 || !maxAgeMs) return false;
+
+  const since = new Date(new Date(checkedAt).getTime() - maxAgeMs).toISOString();
+  const db = openDatabase();
+  try {
+    const rows = db.prepare(`
+      SELECT deal_id AS dealId
+      FROM deal_history
+      WHERE game_key = ?
+        AND store_id = ?
+        AND checked_at >= ?
+        AND abs(savings_percent - ?) < 0.001
+    `).all(
+      getGameKey(deal),
+      String(deal.storeID),
+      since,
+      toNumber(deal.savings),
+    );
+    return rows.some((row) => sentDealIds.has(row.dealId));
+  } finally {
+    db.close();
+  }
+}
+
 export function getDealHistory(deal, limit = 20) {
   const db = openDatabase();
   try {

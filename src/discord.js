@@ -100,11 +100,11 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
   const developers = steamDetails?.developers?.join(", ") || "정보 없음";
   const publishers = steamDetails?.publishers?.join(", ") || "정보 없음";
   const description = options.expiryReminder
-    ? `${storeName} 할인이 오늘 종료될 예정입니다.`
+    ? `🚨 **오늘 할인 종료**\n${storeName} 할인이 오늘 종료될 예정입니다.`
     : `${storeName}에서 ${discount}% 할인 중입니다.`;
   const embed = new EmbedBuilder()
-    .setColor(0x0f8f7f)
-    .setTitle(deal.title)
+    .setColor(options.expiryReminder ? 0xe5484d : 0x0f8f7f)
+    .setTitle(options.expiryReminder ? `🚨 오늘 할인 종료 · ${deal.title}` : deal.title)
     .setURL(dealUrl.toString())
     .setDescription(description)
     .setThumbnail(deal.thumb || null)
@@ -178,10 +178,13 @@ export function buildDealEmbed(deal, steamDetails, aaaReason, usdToKrw, options 
 
 export function buildSeriesDealEmbed(group, usdToKrw, options = {}) {
   const representative = group.items[0]?.deal;
+  const expiryCount = group.items.filter((item) => item.dealExpiry?.isToday).length;
   const embed = new EmbedBuilder()
-    .setColor(0x0f8f7f)
-    .setTitle(`${group.label} 시리즈 할인`)
-    .setDescription(`${group.items.length}개 작품이 할인 중입니다.`)
+    .setColor(expiryCount > 0 ? 0xe5484d : 0x0f8f7f)
+    .setTitle(expiryCount > 0 ? `🚨 오늘 할인 종료 · ${group.label} 시리즈` : `${group.label} 시리즈 할인`)
+    .setDescription(expiryCount > 0
+      ? `🚨 **${expiryCount}개 작품의 할인이 오늘 종료됩니다.**\n총 ${group.items.length}개 작품이 할인 중입니다.`
+      : `${group.items.length}개 작품이 할인 중입니다.`)
     .setThumbnail(representative?.thumb || null)
     .addFields(
       {
